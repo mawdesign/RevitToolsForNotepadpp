@@ -1,0 +1,14 @@
+{
+    "builtin": "False",
+    "default_enabled": "True",
+    "type": "extension",
+    "rocket_mode_compatible": "True",
+    "name": "pyNotpad++",
+    "description": "A collection of tools for working with Revit support files and formulas when using Notepad++",
+    "author": "MAW Design",
+    "author_profile": "https://maw.nz",
+    "url": "https://github.com/mawdesign/RevitToolsForNotepadpp",
+    "website": "https://maw.nz",
+    "image": "",
+    "dependencies": []
+    }
