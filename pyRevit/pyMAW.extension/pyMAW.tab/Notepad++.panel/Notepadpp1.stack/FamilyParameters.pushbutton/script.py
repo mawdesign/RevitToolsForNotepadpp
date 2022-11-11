@@ -7,34 +7,35 @@ import subprocess
 family_properties = []
 text = ""
 
+def try_or(fn, default = None):
+    try:
+        return fn()
+    except:
+        return default
+
 def get_parameters():
-    # get list of parameters to be exported from user
+    # get list of parameters to be exported
     fm = revit.doc.FamilyManager
-    return forms.SelectFromList.show(
-        [x.Definition.Name for x in fm.GetParameters()],
-        title="Select Parameters",
-        multiselect=True,
-    ) or []
+    return [{"Name" : x.Definition.Name, 
+        "Formula" : x.Formula or "",
+        "Type" : x.Definition.ParameterType,
+        "isShared" : x.IsShared,
+        "GUID" : try_or(lambda: x.GUID, "")
+        } for x in fm.GetParameters()]
 
-def get_parameter_properties(params):
-    #get parameters of a parameter
-    fm = revit.doc.FamilyManager
-    return [{"Name" : x.Definition.Name, "Formula" : x.Formula or ""} for x in fm.GetParameters()
-                      if x.Definition.Name in params]
-
-if __name__ == '__main__':
+# get path to executable
+cfg = script.get_config("Notepad++")
+exepath = cfg.get_option('notepadpath', os.path.join(os.environ["ProgramFiles"],"Notepad++", "Notepad++.exe"))
+if not exepath is None and os.path.exists(exepath):
     forms.check_familydoc(exitscript=True)
     filepath = script.get_document_data_file("formulas", "tmp")
     if filepath:
-        family_params = get_parameters()
-        family_properties = get_parameter_properties(family_params)
-        for fp in family_properties:
-            text += "[{Name}]\r\n{Formula}\r\n\r\n".format(**fp) 
-        # output = script.get_output()
-        # output.print_code(text)
+        for fp in get_parameters():
+            text += "[{}] {}\r\n".format(fp["Name"], str(fp["Type"]).upper())
+            text += "{}\r\n".format(fp["Formula"]) if fp["Formula"] != "" else ""
+            text += "\r\n" 
         file = revit.files.write_text(filepath, text)
-        subprocess.Popen(['C:\\Users\\Warwickm\\OneDrive - Warren and Mahoney\\Documents\\PortableApps\\Notepad++Portable\\Notepad++Portable.exe',filepath,"-llisp"])
-
+        subprocess.Popen([exepath,filepath,"-llisp"])
 
 
 # pname.append(param.Definition.Name)
