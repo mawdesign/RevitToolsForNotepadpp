@@ -3,6 +3,7 @@ from pyrevit import revit, DB
 from pyrevit import script
 import os
 import subprocess
+import re
 
 family_properties = []
 text = ""
@@ -18,17 +19,19 @@ def get_parameters():
     fm = revit.doc.FamilyManager
     return [{"Name" : x.Definition.Name, 
         "Formula" : x.Formula or "",
-        "Type" : x.Definition.ParameterType,
+        "Type" : x.Definition.ParameterType if str(x.Definition.ParameterType) !="Invalid" else "Built-in",
         "isShared" : x.IsShared,
         "GUID" : try_or(lambda: x.GUID, "")
         } for x in fm.GetParameters()]
-
 # get path to executable
 cfg = script.get_config("Notepad++")
 exepath = cfg.get_option('notepadpath', os.path.join(os.environ["ProgramFiles"],"Notepad++", "Notepad++.exe"))
 if not exepath is None and os.path.exists(exepath):
     forms.check_familydoc(exitscript=True)
-    filepath = script.get_document_data_file("formulas", "tmp")
+    docname = __revit__.ActiveUIDocument.Document.Title
+    docname = re.sub('.rfa$', '', docname)
+    docname += "_Formula"
+    filepath = script.get_instance_data_file(docname)
     if filepath:
         for fp in get_parameters():
             text += "[{}] {}\r\n".format(fp["Name"], str(fp["Type"]).upper())
