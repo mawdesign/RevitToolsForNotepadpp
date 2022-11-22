@@ -21,7 +21,7 @@ def get_parameters():
         "Formula" : x.Formula or "",
         "Type" : x.Definition.ParameterType if str(x.Definition.ParameterType) !="Invalid" else "Built-in",
         "isShared" : x.IsShared,
-        "GUID" : try_or(lambda: x.GUID, "")
+        "GUID" : try_or(lambda: x.GUID, ""),
         } for x in fm.GetParameters()]
 # get path to executable
 cfg = script.get_config("Notepad++")
@@ -33,7 +33,7 @@ if not exepath is None and os.path.exists(exepath):
     docname += "_Formula"
     filepath = script.get_instance_data_file(docname)
     if filepath:
-        for fp in get_parameters():
+        for fp in sorted(get_parameters(), key=lambda p: p["Name"].lower()):
             text += "[{}] {}\r\n".format(fp["Name"], str(fp["Type"]).upper())
             text += "{}\r\n".format(fp["Formula"]) if fp["Formula"] != "" else ""
             text += "\r\n" 

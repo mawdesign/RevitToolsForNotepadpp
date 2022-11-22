@@ -1,6 +1,6 @@
 title: Notepad++
 layout:
   - Notepad++
-  - Notepadpp1
-  - Sharedparameters
+  - ExportToNpp
+  - OpenNotepadpp
   - NotepadppConfig
