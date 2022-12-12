@@ -11,6 +11,6 @@ Either shift-click the Open Notepad++ button on the new pyMAW tab, or click the 
 The only thing to set is the path to Notepad++ on your machine, when you choose to set the path it will try and suggest the most useful path, this only needs to be set once and will be saved in your pyRevit configuation options.
 ## PythonScript
 ### Installation
-PythonScript can be installed from the Plugins Admin in Notepad++, however this is will install an outdated version. To get the current or latest version go directly to the [Github/Releases](https://github.com/bruderstein/PythonScript/releases). It is recommended that you install the *_Full version to get the ability to display a gui which is used by some of these scripts.
+PythonScript can be installed from the Plugins Admin in Notepad++, however this is will install an outdated version. To get the current or latest version go directly to the [Github/Releases](https://github.com/bruderstein/PythonScript/releases). It is recommended that you install the PythonScript_Full_* and PythonScript_TclTk_* versions to get the ability to display a gui which is used by some of these scripts.
 
 See also the Notepad++ [FAQ: How to install and run a script in PythonScript](https://community.notepad-plus-plus.org/topic/23039/faq-desk-how-to-install-and-run-a-script-in-pythonscript).
