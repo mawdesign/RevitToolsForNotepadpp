@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+#From https://notepad-plus-plus.org/community/topic/14501/has-a-plugin-like-sublime-plugin-brackethighlighter/7
+
 try:
 
     BH__dict
@@ -48,6 +51,7 @@ except NameError:
         box_starting_index = -1
 
         stack = Stack()
+        
 
         for j in range(caret_index_into_str, len(str_containing_caret)):
             c = str_containing_caret[j]
@@ -83,7 +87,7 @@ except NameError:
         if box_ending_index != -1:
             if box_starting_index != -1:
                 if str_containing_caret[box_ending_index] == get_closing_char_via_opening_char_dict[str_containing_caret[box_starting_index]]:
-                    retval = (box_starting_index, box_ending_index + 1)
+                    retval = (len(str_containing_caret[:box_starting_index].encode('utf-8')), len(str_containing_caret[:box_ending_index + 1].encode('utf-8')))
 
         return retval
 
@@ -207,7 +211,7 @@ except NameError:
 
                     (box_start_offset, box_end_offset) = BH__containing_box_indices_into_string(
                         editorX.getTextRange(start_pos, end_pos),
-                        editorX.getCurrentPos() - start_pos
+                        len(editorX.getTextRange(start_pos, editorX.getCurrentPos()))
                         )
 
                     if box_start_offset != None:
