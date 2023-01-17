@@ -26,7 +26,7 @@ while lineNo < totalLines and not line.startswith("*PARAM"):
 
 # get parameters
 firstParamLine = lineNo
-while lineNo <= totalLines and editor.getLine(lineNo).startswith("PARAM"):
+while lineNo < totalLines and editor.getLine(lineNo).startswith("PARAM"):
     line = editor.getLine(lineNo)
     param.append(line)
     lineNo += 1
