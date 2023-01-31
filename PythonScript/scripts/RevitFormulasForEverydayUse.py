@@ -12,7 +12,7 @@ lineNo = 0
 totalLines = editor.getLineCount()
 scriptPath = os.path.dirname(__file__)
 placesList = [1000, 500, 100, 50, 10, 5, 1, 0.5, 0.1, 0.01]
-unitsList = ["mm", "m", "cm", "m²", "m³", "\'", "\""]
+unitsList = ["mm", "m", "cm", "m²", "m³", "°", "\'", "\""]
 roundFuncs = ["Round", "RoundUp", "RoundDown"]
 
 trigFormulas = {
@@ -288,6 +288,20 @@ circFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
 circFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 buildTabs.add(circFrame, text='Circle', underline=1)
 
+# Circles with pi π
+# Circumference = pi() * (Radius * 2)
+# Circumference = pi() * Diameter
+# Circle Area = pi() * Radius ^ 2
+
+# [a] ANGLE = 2 * acos(d / R)
+# [Arc Height] LENGTH
+# [c] LENGTH = Width
+# [d] LENGTH = R - h
+# [h] LENGTH = Arc Height
+# [Height] LENGTH
+# [R] LENGTH = (h / 2) + ((c ^ 2) / (8 * h))
+# [s] LENGTH = a / 180° * pi() * R
+# [Width] LENGTH
 
 # Misc Tab
 miscFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
