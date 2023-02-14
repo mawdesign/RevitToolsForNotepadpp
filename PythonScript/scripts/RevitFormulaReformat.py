@@ -5,13 +5,30 @@ new_string = ""
 indent_level = 0
 extra_len = 0
 indent = "\t"
-text = []
+quotes = []
 isSelection = False
 
-# editor.newLine()
-# editor.insertText(curPos, fLine)
-
-# if(test statement, if(and(one, two, three), "one true", if(another conditional test, "all true, really", "alternative")), "otherwise")
+# Input:
+# if(test statement, if(and(one, two, three), "and true", if(another conditional test, "all true, really", "alternative")), "otherwise")
+#
+# Output:
+# if(
+#	test statement,
+#	if(
+#		and(
+#			one,
+#			two,
+#			three
+#		),
+#		"and true",
+#		if(
+#			another conditional test,
+#			"all true, really",
+#			"alternative"
+#		)
+#	),
+#	"otherwise"
+# )
 
 # input
 lineNo = editor.lineFromPosition(editor.getCurrentPos())
@@ -21,14 +38,13 @@ if isSelection:
 else:
     editor.home()
     original_string = editor.getLine(lineNo)
-# original_string = "if(test statement, if(and(one, two, three), \"one true\", if(another conditional test, \"all true, really\", \"alternative\")), otherwise)"
 
-# save strings out
-def text_sub(match):
-    global text
-    text.append(match[0])
-    return "{t[" + str(len(text)-1) + "]}"
-new_string = re.sub(r"\".+?\"", text_sub, original_string)
+# pop quoted strings out
+def quote_sub(match):
+    global quotes
+    quotes.append(match[0])
+    return "{t[" + str(len(quotes)-1) + "]}"
+new_string = re.sub(r"\".+?\"", quote_sub, original_string)
 
 # add returns
 new_string = re.sub(r",", ",\n", new_string)
@@ -66,11 +82,10 @@ for st in re.finditer('\n', new_string + "\n"):
     pos = st.end() + extra_len
 
 # restore strings
-new_string = new_string.format(t=text)
+new_string = new_string.format(t=quotes)
 
 # output
 editor.beginUndoAction()
-# console.write(new_string + "\r\n===\r\n")
 if isSelection:
     editor.replaceSel(new_string)
 else:
