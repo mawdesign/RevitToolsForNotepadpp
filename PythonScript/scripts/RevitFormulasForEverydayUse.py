@@ -12,45 +12,105 @@ lineNo = 0
 totalLines = editor.getLineCount()
 scriptPath = os.path.dirname(__file__)
 placesList = [1000, 500, 100, 50, 10, 5, 1, 0.5, 0.1, 0.01]
-unitsList = ["mm", "m", "cm", "m²", "m³", "\'", "\""]
+unitsList = ["mm", "m", "cm", "m²", "m³", "°", "\'", "\""]
 roundFuncs = ["Round", "RoundUp", "RoundDown"]
 
 trigFormulas = {
     "∡A" : {
-        "ab" : "atan({0} / {1})",
-        "ac" : "asin({0} / {1})",
-        "bc" : "acos({0} / {1})",
-        "a∡B" : "90° - {1}",
-        "b∡B" : "90° - {1}",
-        "c∡B" : "90° - {1}" },
+        "a,b" : "atan({0} / {1})",
+        "a,c" : "asin({0} / {1})",
+        "b,c" : "acos({0} / {1})",
+        "a,∡B" : "90° - {1}",
+        "b,∡B" : "90° - {1}",
+        "c,∡B" : "90° - {1}" },
     "∡B" : {
-        "ab" : "atan({1} / {0})",
-        "ac" : "acos({0} / {1})",
-        "bc" : "asin({0} / {1})",
-        "a∡A" : "90° - {1}",
-        "b∡A" : "90° - {1}",
-        "c∡A" : "90° - {1}" }, 
+        "a,b" : "atan({1} / {0})",
+        "a,c" : "acos({0} / {1})",
+        "b,c" : "asin({0} / {1})",
+        "a,∡A" : "90° - {1}",
+        "b,∡A" : "90° - {1}",
+        "c,∡A" : "90° - {1}" }, 
     "a" : {
-        "bc" : "sqrt({1}^2 - {0}^2)",
-        "b∡A" : "{0} * tan({1})",
-        "b∡B" : "{0} / tan({1})",
-        "c∡A" : "{0} * sin({1})",
-        "c∡B" : "{0} * cos({1})"},
+        "b,c" : "sqrt({1}^2 - {0}^2)",
+        "b,∡A" : "{0} * tan({1})",
+        "b,∡B" : "{0} / tan({1})",
+        "c,∡A" : "{0} * sin({1})",
+        "c,∡B" : "{0} * cos({1})"},
     "b" : {
-        "ac" : "sqrt({1}^2 - {0}^2)",
-        "a∡A" : "{0} / tan({1})",
-        "a∡B" : "{0} * tan({1})",
-        "c∡A" : "{0} * cos({1})",
-        "c∡B" : "{0} * sin({1})"},
+        "a,c" : "sqrt({1}^2 - {0}^2)",
+        "a,∡A" : "{0} / tan({1})",
+        "a,∡B" : "{0} * tan({1})",
+        "c,∡A" : "{0} * cos({1})",
+        "c,∡B" : "{0} * sin({1})"},
     "c" : {
-        "ab" : "sqrt({0}^2 + {1}^2)",
-        "a∡A" : "{0} / sin({1})",
-        "a∡B" : "{0} / cos({1})",
-        "b∡A" : "{0} / cos({1})",
-        "b∡B" : "{0} / sin({1})"},
+        "a,b" : "sqrt({0}^2 + {1}^2)",
+        "a,∡A" : "{0} / sin({1})",
+        "a,∡B" : "{0} / cos({1})",
+        "b,∡A" : "{0} / cos({1})",
+        "b,∡B" : "{0} / sin({1})"},
     }
 trigVariables = list(trigFormulas.keys())
 #["∡A", "∡B", "a", "b", "c"]
+
+# Circle variables
+        # "c,d" : "",
+        # "c,h" : "",
+        # "c,s" : "",
+        # "c,D" : "",
+        # "c,R" : "",
+        # "c,∡A" : "",
+        # "d,h" : "",
+        # "d,s" : "",
+        # "d,D" : "",
+        # "d,R" : "",
+        # "d,∡A" : "",
+        # "h,s" : "",
+        # "h,D" : "",
+        # "h,R" : "",
+        # "h,∡A" : "",
+        # "s,D" : "",
+        # "s,R" : "",
+        # "s,∡A" : "",
+        # "D,∡A" : "",
+        # "R,∡A" : "",
+
+circFormulas = {
+    "Area" : {
+        "D" : "pi() * ({0} / 2) ^ 2",
+        "R" : "pi() * {0} ^ 2"},
+    "Circumference" : {
+        "D" : "pi() * {0}",
+        "R" : "2 * pi() * {0}"},
+    "c (Chord Length)" : {
+        "d,R" : "2 * sqrt({1}^2 − {0}^2)",
+        "d,∡A" : "2 * {0} * tan({1} / 2)",
+        "h,R" : "2 * sqrt(2 * {1} * {0} - {0}^2)",
+        "R,∡A" : "2 * {0} * sin({1} / 2)"},
+    "d (Apothem)" : {
+        "c,R" : "sqrt({1}^2 - {0}^2 / 4)",
+        "h,D" : "{1} / 2 - {0}",
+        "h,R" : "{1} - {0}",
+        "R,∡A" : "{0} * cos({1} / 2)"},
+    "h (Arc Height)" : {
+        "c,R" : "{1} - sqrt({1}^2 - {0}^2 / 4)",
+        "c,∡A" : "{0} / 2 * tan({1} / 4)",
+        "R,∡A" : "{0} * (1 - cos({1} / 2))"},
+    "s (Arc Length)" : {
+        "c,R" : "asin({0} / {1} / 2) * 2 * {1}",
+        "c,∡A" : "{1} / 180° * pi() * {0} / (sin({1} / 2) * 2)",
+        "D,∡A" : "{1} / 360° * pi() * {0}",
+        "R,∡A" : "{1} / 180° * pi() * {0}"},
+    "D (Diameter)" : "",
+    "R (Radius)" : {
+        "c,h" : "({1} / 2) + (({0} ^ 2) / (8 * {1}))"},
+    "∡A (Arc Angle)" : {
+        "c,d" : "2 * atan({0} / {1} / 2)",
+        "c,R" : "2 * asin({0} / {1} / 2)",
+        "d,D" : "2 * acos({0} / {1} / 2)",
+        "d,R" : "2 * acos({0} / {1})",
+        "s,R" : "{0} / {1}"},
+    }
+circVariables = list(circFormulas.keys())
 
 # Max / Min formulas:
 # Return Length = if(A > D, if(A > C, if(A > B, A, B), if(B > C, B, C)), if(B > D, if(B > C, B, C), if(C > D, C, D)))
@@ -58,15 +118,15 @@ trigVariables = list(trigFormulas.keys())
 def fxMinMaxAvg(i, fn = ">"):
     match fn:
         case "<" | ">":
-            if len(i) == 2:
+            if len(i)  == 1:
+                return i[0]
+            elif len(i) == 2:
                 return "if({0} {2} {1}, {0}, {1})".format(i[0], i[1], fn)
             elif len(i)  > 2:
                 fx = "if({0} {2} {1}, ".format(i[0], i[-1], fn)
                 fx += fxMinMaxAvg(i[ : -1], fn) + ", "
                 fx += fxMinMaxAvg(i[1 : ], fn) + ")"
                 return fx
-            elif len(i)  == 1:
-                return i[0]
         case "avg" if len(i) > 1:
             return "(" + " + ".join(i) + ") / " + str(len(i))
     return i
@@ -85,7 +145,7 @@ def createFormulas (*args):
         case "Trigonometry":
             want = trigWanted.get()
             known = sorted([trigKnown1var.get(), trigKnown2var.get()])
-            knownKey = "".join(sorted([trigKnown1var.get(), trigKnown2var.get()]))
+            knownKey = ",".join(known)
             if known[0] == trigKnown1var.get():
                 known1 = trigKnown1param.get()
                 known2 = trigKnown2param.get()
@@ -118,6 +178,7 @@ def createFormulas (*args):
                 close = False
         case _:
             messagebox.showerror(title="Not defined", message="No function for that option\n{1} Tab\nOption {0}".format(fType.get(), currentTab))
+            close = False
     
     # Process input
     if fLine != "":
@@ -288,6 +349,38 @@ circFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
 circFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 buildTabs.add(circFrame, text='Circle', underline=1)
 
+# - image
+circImageSrc = tk.PhotoImage(file=scriptPath + "/circ.png")
+try:
+    ttk.Label(circFrame, image=circImageSrc).grid(column=1, row=1, columnspan=3)
+except:
+    ttk.Label(circFrame, text="Circle Segment").grid(column=1, row=1, columnspan=3)
+
+# - wanted
+circWanted = StringVar()
+circWanted_combo = ttk.Combobox(circFrame, textvariable=circWanted)
+circWanted_combo['values'] = circVariables
+circWanted_combo.grid(column=3, row=2, sticky=(W, E))
+ttk.Label(circFrame, text="Desired value:").grid(column=1, row=2, sticky=W)
+circWanted.set(circVariables[0])
+
+ttk.Label(circFrame, text="where…").grid(column=1, row=3, sticky=W)
+
+
+# # Circles with pi π
+# # Circumference = pi() * (Radius * 2)
+# # Circumference = pi() * Diameter
+# # Circle Area = pi() * Radius ^ 2
+# #
+# # [a] ANGLE = 2 * acos(d / R)
+# # [Arc Height] LENGTH
+# # [c] LENGTH = Width
+# # [d] LENGTH = R - h
+# # [h] LENGTH = Arc Height
+# # [Height] LENGTH
+# # [R] LENGTH = (h / 2) + ((c ^ 2) / (8 * h))
+# # [s] LENGTH = a / 180° * pi() * R
+# # [Width] LENGTH
 
 # Misc Tab
 miscFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
