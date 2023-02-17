@@ -100,9 +100,20 @@ circFormulas = {
         "c,∡A" : "{1} / 180° * pi() * {0} / (sin({1} / 2) * 2)",
         "D,∡A" : "{1} / 360° * pi() * {0}",
         "R,∡A" : "{1} / 180° * pi() * {0}"},
-    "D (Diameter)" : "",
+    "D (Diameter)" : {
+        "c,h" : "{1} + (({0} ^ 2) / (4 * {1}))",
+        "c,R" : "{1} * 2",
+        "d,R" : "{1} * 2",
+        "h,R" : "{1} * 2",
+        "s,R" : "{1} * 2",
+        "R,∡A" : "{0} * 2"},
     "R (Radius)" : {
-        "c,h" : "({1} / 2) + (({0} ^ 2) / (8 * {1}))"},
+        "c,h" : "({1} / 2) + (({0} ^ 2) / (8 * {1}))",
+        "c,D" : "{1} / 2",
+        "d,D" : "{1} / 2",
+        "h,D" : "{1} / 2",
+        "s,D" : "{1} / 2",
+        "D,∡A" : "{0} / 2"},
     "∡A (Arc Angle)" : {
         "c,d" : "2 * atan({0} / {1} / 2)",
         "c,R" : "2 * asin({0} / {1} / 2)",
@@ -233,12 +244,32 @@ def setFType(val, unless = []):
 
 def setTrigParams (*args):
     global trigKnown1param, trigKnown1param_combo, trigKnown2param, trigKnown1var, trigKnown2var
-    trigKnown1param_combo['values'] = filterParams('ANGLE' if trigKnown1var.get()[0] == '∡' else 'LENGTH')
-    if trigKnown1param.get() in filterParams('LENGTH' if trigKnown1var.get()[0] == '∡' else 'ANGLE'):
+    trigKnown1param_combo['values'] = filterParams('ANGLE' if '∡' in trigKnown1var.get()[0] else 'LENGTH')
+    if trigKnown1param.get() in filterParams('LENGTH' if '∡' in trigKnown1var.get()[0] else 'ANGLE'):
         trigKnown1param.set("")
-    trigKnown2param_combo['values'] = filterParams('ANGLE' if trigKnown2var.get()[0] == '∡' else 'LENGTH')
-    if trigKnown2param.get() in filterParams('LENGTH' if trigKnown2var.get()[0] == '∡' else 'ANGLE'):
+    trigKnown2param_combo['values'] = filterParams('ANGLE' if '∡' in trigKnown2var.get() else 'LENGTH')
+    if trigKnown2param.get() in filterParams('LENGTH' if '∡' in trigKnown2var.get() else 'ANGLE'):
         trigKnown2param.set("")
+
+def setCircParams (*args):
+    global circWanted, circKnown1var, circKnown2var, circFormulas
+    global circKnown2var_combo, circKnown1param_combo, circKnown2param_combo
+    # want = circWanted.get().split(" ")[0]
+    varCount = len(list(circFormulas[circWanted.get()].keys())[0].split(","))
+    if varCount > 1:
+        circKnown2var_combo['state'] = "enabled"
+        circKnown2param_combo['state'] = "enabled"
+        if len(circKnown2var.get()) == 0:
+            if circKnown1var.get() == circVariables[5]:
+                circKnown2var.set(circVariables[4])
+            else:
+                circKnown2var.set(circVariables[5])
+        circKnown2param_combo['values'] = filterParams('ANGLE' if '∡' in circKnown2var.get() else 'LENGTH')
+    else:
+        circKnown2var_combo['state'] = "disabled"
+        circKnown2param_combo['state'] = "disabled"
+        circKnown2var.set("")
+    circKnown1param_combo['values'] = filterParams('ANGLE' if '∡' in circKnown1var.get() else 'LENGTH')
 
 def revitFormulasForEverydayUse():
     webbrowser.open("https://www.revitforum.org/node/1126")
@@ -344,7 +375,9 @@ trigKnown2param_combo['values'] = filterParams('LENGTH')
 trigKnown2param_combo.grid(column=3, row=5, sticky=(W, E))
 trigKnown2var_combo.bind("<<ComboboxSelected>>", setTrigParams)
 
-# Circle Tab
+#  ________
+# / Circle \ Tab
+#+----------+----
 circFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
 circFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 buildTabs.add(circFrame, text='Circle', underline=1)
@@ -362,10 +395,38 @@ circWanted_combo = ttk.Combobox(circFrame, textvariable=circWanted)
 circWanted_combo['values'] = circVariables
 circWanted_combo.grid(column=3, row=2, sticky=(W, E))
 ttk.Label(circFrame, text="Desired value:").grid(column=1, row=2, sticky=W)
-circWanted.set(circVariables[0])
+circWanted.set(circVariables[2])
+circWanted_combo.bind("<<ComboboxSelected>>", setCircParams)
 
 ttk.Label(circFrame, text="where…").grid(column=1, row=3, sticky=W)
 
+# - known 1
+circKnown1var = StringVar()
+circKnown1var_combo = ttk.Combobox(circFrame, textvariable=circKnown1var, width=10)
+circKnown1var_combo['values'] = circVariables
+circKnown1var_combo.grid(column=1, row=4, sticky=(W, E))
+circKnown1var.set(circVariables[3])
+ttk.Label(circFrame, text="=").grid(column=2, row=4, sticky=W)
+circKnown1param = StringVar()
+circKnown1param_combo = ttk.Combobox(circFrame, textvariable=circKnown1param)
+circKnown1param_combo['values'] = filterParams('LENGTH')
+circKnown1param_combo.grid(column=3, row=4, sticky=(W, E))
+circKnown1var_combo.bind("<<ComboboxSelected>>", setCircParams)
+
+# - known 2
+circKnown2var = StringVar()
+circKnown2var_combo = ttk.Combobox(circFrame, textvariable=circKnown2var, width=10)
+circKnown2var_combo['values'] = circVariables
+circKnown2var_combo['state'] = "disabled"
+circKnown2var_combo.grid(column=1, row=5, sticky=(W, E))
+ttk.Label(circFrame, text="=").grid(column=2, row=5, sticky=W)
+circKnown2param = StringVar()
+circKnown2param_combo = ttk.Combobox(circFrame, textvariable=circKnown2param)
+circKnown2param_combo['values'] = filterParams('LENGTH')
+circKnown2param_combo['state'] = "disabled"
+circKnown2param_combo.grid(column=3, row=5, sticky=(W, E))
+circKnown2var_combo.bind("<<ComboboxSelected>>", setCircParams)
+setCircParams()
 
 # # Circles with pi π
 # # Circumference = pi() * (Radius * 2)
