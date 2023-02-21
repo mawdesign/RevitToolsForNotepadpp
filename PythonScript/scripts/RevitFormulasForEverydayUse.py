@@ -53,75 +53,75 @@ trigVariables = list(trigFormulas.keys())
 #["∡A", "∡B", "a", "b", "c"]
 
 # Circle variables
+        # "D,c" : "",
+        # "D,d" : "",
+        # "D,h" : "",
+        # "D,s" : "",
+        # "D,∡A" : "",
+        # "R,c" : "",
+        # "R,d" : "",
+        # "R,h" : "",
+        # "R,s" : "",
+        # "R,∡A" : "",
         # "c,d" : "",
         # "c,h" : "",
         # "c,s" : "",
-        # "c,D" : "",
-        # "c,R" : "",
         # "c,∡A" : "",
         # "d,h" : "",
         # "d,s" : "",
-        # "d,D" : "",
-        # "d,R" : "",
         # "d,∡A" : "",
         # "h,s" : "",
-        # "h,D" : "",
-        # "h,R" : "",
         # "h,∡A" : "",
-        # "s,D" : "",
-        # "s,R" : "",
         # "s,∡A" : "",
-        # "D,∡A" : "",
-        # "R,∡A" : "",
 
 circFormulas = {
-    "Area" : {
-        "D" : "pi() * ({0} / 2) ^ 2",
+    "Area (Circle)" : {
+        "D" : "pi() * ({0} / 2)^2",
         "R" : "pi() * {0} ^ 2"},
-    "Circumference" : {
+    "Circumference (Circle)" : {
         "D" : "pi() * {0}",
         "R" : "2 * pi() * {0}"},
-    "c (Chord Length)" : {
-        "d,R" : "2 * sqrt({1}^2 − {0}^2)",
-        "d,∡A" : "2 * {0} * tan({1} / 2)",
-        "h,R" : "2 * sqrt(2 * {1} * {0} - {0}^2)",
-        "R,∡A" : "2 * {0} * sin({1} / 2)"},
-    "d (Apothem)" : {
-        "c,R" : "sqrt({1}^2 - {0}^2 / 4)",
-        "h,D" : "{1} / 2 - {0}",
-        "h,R" : "{1} - {0}",
+    "c = Chord Length" : {
+        "R,d" : "2 * sqrt({0}^2 - {1}^2)",
+        "R,h" : "2 * sqrt(2 * {0} * {1} - {1}^2)",
+        "R,∡A" : "2 * {0} * sin({1} / 2)",
+        "d,∡A" : "2 * {0} * tan({1} / 2)"},
+    "d = Apothem" : {
+        "D,h" : "{0} / 2 - {1}",
+        "R,c" : "sqrt({0}^2 - {1}^2 / 4)",
+        "R,h" : "{0} - {1}",
         "R,∡A" : "{0} * cos({1} / 2)"},
-    "h (Arc Height)" : {
-        "c,R" : "{1} - sqrt({1}^2 - {0}^2 / 4)",
-        "c,∡A" : "{0} / 2 * tan({1} / 4)",
-        "R,∡A" : "{0} * (1 - cos({1} / 2))"},
-    "s (Arc Length)" : {
-        "c,R" : "asin({0} / {1} / 2) * 2 * {1}",
-        "c,∡A" : "{1} / 180° * pi() * {0} / (sin({1} / 2) * 2)",
+    "h = Arc Height" : {
+        "R,c" : "{0} - sqrt({0}^2 - {1}^2 / 4)",
+        "R,∡A" : "{0} * (1 - cos({1} / 2))",
+        "c,∡A" : "{0} / 2 * tan({1} / 4)"},
+    "s = Arc Length" : {
         "D,∡A" : "{1} / 360° * pi() * {0}",
-        "R,∡A" : "{1} / 180° * pi() * {0}"},
-    "D (Diameter)" : {
-        "c,h" : "{1} + (({0} ^ 2) / (4 * {1}))",
-        "c,R" : "{1} * 2",
-        "d,R" : "{1} * 2",
-        "h,R" : "{1} * 2",
-        "s,R" : "{1} * 2",
-        "R,∡A" : "{0} * 2"},
-    "R (Radius)" : {
-        "c,h" : "({1} / 2) + (({0} ^ 2) / (8 * {1}))",
-        "c,D" : "{1} / 2",
-        "d,D" : "{1} / 2",
-        "h,D" : "{1} / 2",
-        "s,D" : "{1} / 2",
-        "D,∡A" : "{0} / 2"},
-    "∡A (Arc Angle)" : {
-        "c,d" : "2 * atan({0} / {1} / 2)",
-        "c,R" : "2 * asin({0} / {1} / 2)",
-        "d,D" : "2 * acos({0} / {1} / 2)",
-        "d,R" : "2 * acos({0} / {1})",
-        "s,R" : "{0} / {1}"},
+        "R,c" : "2 * asin({1} / {0} / 2) / 180° * {0} * pi()",
+        "R,∡A" : "{1} / 180° * pi() * {0}",
+        "c,∡A" : "{1} / 180° * pi() * {0} / (sin({1} / 2) * 2)"},
+    "D = Diameter" : {
+        "R,c" : "{0} * 2",
+        "R,d" : "{0} * 2",
+        "R,h" : "{0} * 2",
+        "R,s" : "{0} * 2",
+        "R,∡A" : "{0} * 2",
+        "c,h" : "{1} + (({0} ^ 2) / (4 * {1}))"},
+    "R = Radius" : {
+        "D,c" : "{0} / 2",
+        "D,d" : "{0} / 2",
+        "D,h" : "{0} / 2",
+        "D,s" : "{0} / 2",
+        "D,∡A" : "{0} / 2",
+        "c,h" : "({1} / 2) + (({0} ^ 2) / (8 * {1}))"},
+    "∡A = Arc Angle" : {
+        "D,d" : "2 * acos({1} / {0} / 2)",
+        "R,c" : "2 * asin({1} / {0} / 2)",
+        "R,d" : "2 * acos({1} / {0})",
+        "R,s" : "{1} / {0} / pi() * 180°",
+        "c,d" : "2 * atan({0} / {1} / 2)"},
     }
-circVariables = list(circFormulas.keys())
+circVariables = list(filter(lambda x: "=" in x, circFormulas.keys()))
 
 # Max / Min formulas:
 # Return Length = if(A > D, if(A > C, if(A > B, A, B), if(B > C, B, C)), if(B > D, if(B > C, B, C), if(C > D, C, D)))
@@ -167,7 +167,26 @@ def createFormulas (*args):
             if knownKey in trigFormulas[want]:
                 fLine = trigFormulas[want][knownKey].format(known1, known2)
             else:
-                messagebox.showerror(title="No formula", message="No solution for {0} where {1} + {2} are known\r\n".format(want, trigKnown1var.get(), trigKnown2var.get()))
+                messagebox.showerror(title="No formula", message="No solution for {0} where {1} + {2} are known\r\n".format(want, known[0], known[1]))
+                close = False
+        case "Circle":
+            want = circWanted.get()
+            known1 = circKnown1var.get()
+            known1 = known1[:known1.index("=")-1] if "=" in known1 else known1
+            known2 = circKnown2var.get()
+            known2 = known2[:known2.index("=")-1] if "=" in known2 else known2
+            known = sorted(filter(None, [known1, known2]))
+            knownKey = ",".join(known)
+            if known[0] == known1:
+                known1 = circKnown1param.get()
+                known2 = circKnown2param.get()
+            else:
+                known1 = circKnown2param.get()
+                known2 = circKnown1param.get()
+            if knownKey in circFormulas[want]:
+                fLine = circFormulas[want][knownKey].format(known1, known2)
+            else:
+                messagebox.showerror(title="No formula", message="No solution for {0} where {1} + {2} are known\r\n".format(want, known[0], known[1]))
                 close = False
         case "Other":
             formulaType = fType.get()
@@ -271,6 +290,23 @@ def setCircParams (*args):
         circKnown2var.set("")
     circKnown1param_combo['values'] = filterParams('ANGLE' if '∡' in circKnown1var.get() else 'LENGTH')
 
+def circTest(*args):
+    fLine = ""
+    for fx in circFormulas:
+        fLine += "{} =\n".format(fx)
+        for var in circFormulas[fx]:
+            known = var.split(",")
+            fLine += " " + circFormulas[fx][var].format(*known) + "\n"
+    messagebox.showerror(title="Values", message=fLine)
+    if fLine != "":
+        editor.beginUndoAction()
+        # Write line
+        editor.home()
+        curPos = editor.getCurrentPos()
+        editor.newLine()
+        editor.insertText(curPos, fLine)
+        editor.endUndoAction()
+
 def revitFormulasForEverydayUse():
     webbrowser.open("https://www.revitforum.org/node/1126")
 
@@ -289,13 +325,15 @@ root.attributes('-topmost',True)
 root.resizable(True, True)
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
-ttk.Sizegrip(root).grid(column=2, row=1, sticky=(S,E))
+ttk.Sizegrip(root).grid(column=3, row=1, sticky=(S,E))
 
 buildTabs = ttk.Notebook(root)
 buildTabs.grid(column=0, row=0, columnspan=4, sticky=(N, W, E, S), padx=5, pady=5)
 buildTabs.enable_traversal()
 
-# Comparison Tab
+#  __________
+# /Comparison\ Tab
+#+------------+----
 compareFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
 compareFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 buildTabs.add(compareFrame, text='Comparison', underline=0)
@@ -325,7 +363,9 @@ fParamsAdd_input = ttk.Entry(compareFrame, textvariable=fParamsAdd)
 fParamsAdd_input.grid(row=7, column=1, sticky="ew")
 ttk.Button(compareFrame, text="+", width=2, command=addParam).grid(row=7, column=2, sticky="ew")
 
-# Trig Tab
+#  ____
+# /Trig\ Tab
+#+------+---
 trigFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
 trigFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 buildTabs.add(trigFrame, text='Trigonometry', underline=0)
@@ -381,6 +421,8 @@ trigKnown2var_combo.bind("<<ComboboxSelected>>", setTrigParams)
 circFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
 circFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 buildTabs.add(circFrame, text='Circle', underline=1)
+circFrame.grid_rowconfigure(1, weight=1)
+circFrame.grid_columnconfigure(3, weight=1)
 
 # - image
 circImageSrc = tk.PhotoImage(file=scriptPath + "/circ.png")
@@ -392,7 +434,7 @@ except:
 # - wanted
 circWanted = StringVar()
 circWanted_combo = ttk.Combobox(circFrame, textvariable=circWanted)
-circWanted_combo['values'] = circVariables
+circWanted_combo['values'] = list(circFormulas.keys())
 circWanted_combo.grid(column=3, row=2, sticky=(W, E))
 ttk.Label(circFrame, text="Desired value:").grid(column=1, row=2, sticky=W)
 circWanted.set(circVariables[2])
@@ -443,7 +485,9 @@ setCircParams()
 # # [s] LENGTH = a / 180° * pi() * R
 # # [Width] LENGTH
 
-# Misc Tab
+#  ____
+# /Misc\ Tab
+#+------+---
 miscFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
 miscFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 buildTabs.add(miscFrame, text='Other', underline=0)
@@ -506,7 +550,9 @@ miscRoundUnits_combo = ttk.Combobox(miscFrame, textvariable=miscRoundUnits)
 miscRoundUnits_combo['values'] = unitsList
 miscRoundUnits_combo.grid(column=2, row=8, sticky=(W, E, N), pady=2)
 
-# About Tab
+#  _____
+# /About\ Tab
+#+-------+---
 aboutFrame = ttk.Frame(buildTabs, padding="3 3 6 6")
 aboutFrame.grid(column=0, row=0, sticky=(N, W, E, S))
 buildTabs.add(aboutFrame, text='?')
@@ -530,9 +576,10 @@ fParamsFilter.set(fParamsFilter_list['values'][0])
 fParamsFilter_list.grid(column=1, row=1, sticky=(W,E), padx="0 10")
 fParamsFilter_list.bind("<<ComboboxSelected>>", setTypeFilter)
 # ttk.Label(compareFrame, text="Parameter Type Filter:").grid(column=0, row=4, sticky=W, pady="10 0")
-action = ttk.Button(root, text="Insert", default="active", command=createFormulas)
-action.grid(column=2, row=1, sticky=(E), padx=5, pady=2)
+ttk.Button(root, text="Insert", default="active", command=createFormulas).grid(column=2, row=1, sticky=(E), padx=5, pady=2)
 ttk.Button(root, text="Close", command=closeDialog).grid(column=3, row=1, sticky=(E), padx=5, pady=2)
+# uncomment to test all formula
+# ttk.Button(root, text="?", command=circTest).grid(column=4, row=1, sticky=(E), padx=5, pady=2)
 
 fType_1.focus_force()
 root.bind('<Return>', lambda e: action.invoke())
