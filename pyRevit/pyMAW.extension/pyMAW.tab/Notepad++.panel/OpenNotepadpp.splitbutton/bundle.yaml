@@ -1,5 +1,11 @@
 title:
- en_us: Open N++
+ en_us: Open Notepad++
 layout:
  - Keynote
  - SharedParameters
+ - RevitINIUser
+ - RevitINIDefault
+ - KeyboardShortcuts
+ - RevitServer
+ - IFCCategories
+ - Journal
