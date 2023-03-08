@@ -1,4 +1,5 @@
 layout:
  - ExportFamilyParameters
  - ExportSharedParameters
- 
+ - ExportFillPatterns
+ - ExportKeynotes
