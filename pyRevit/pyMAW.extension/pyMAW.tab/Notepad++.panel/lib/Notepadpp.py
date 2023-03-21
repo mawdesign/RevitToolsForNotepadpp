@@ -65,7 +65,8 @@ def Open (file = ""):
         syntax = "-lvb -n9999999999"
     # other ideas:
     # - C:\Users\username\AppData\Roaming\Autodesk\Revit\Autodesk Revit 2021\RevitUILayout.xml
-    # - environment file
+    # - Analytic Construction file
+    # - Uniformat Classifications
     # - pat files
     else:
         path = ""
@@ -126,32 +127,32 @@ def Export(file = ""):
         for kn in sorted(get_keynotes(), key=lambda k: k["Key"]):
             text += "{}\t{}\t{}\r\n".format(kn["Key"], kn["Text"], kn["ParentKey"])
         syntax = "-lprops"
-    elif file == "schedule":
-        # probably not useful if can't get at formulas ???
-        # is a schedule selected or is the current view a schedule?
-        # could be multiple schedules selected - should make it so can iterate through them all?
-        # ViewSchedule.Export(folder, name, options)
-        #  ViewScheduleExportOptions()
-        # ScheduleSheetInstance
-        # ViewSchedule
-        #  Name
-        #  Definition...
-        # ScheduleDefinition
-        #  GetFilters
-        #  GetSortGroupFields
-        #  GetFields...
-        # ScheduleField
-        #  FieldType - Formula/Instance/Type
-        #  IsHidden
-        #  SheetColumnWidth
-        #  ColumnHeading
-        #  GetName
-        #  FieldIndex
-        #  ToString
-        # need to add schedule to docname
-        schedulename = "bob"
-        file = "".join( x for x in schedulename if (x.isalnum() or x in "._- ()"))
-        syntax = "-lprops"
+    # elif file == "schedule":
+        # # probably not useful if can't get at formulas ???
+        # # is a schedule selected or is the current view a schedule?
+        # # could be multiple schedules selected - should make it so can iterate through them all?
+        # # ViewSchedule.Export(folder, name, options)
+        # #  ViewScheduleExportOptions()
+        # # ScheduleSheetInstance
+        # # ViewSchedule
+        # #  Name
+        # #  Definition...
+        # # ScheduleDefinition
+        # #  GetFilters
+        # #  GetSortGroupFields
+        # #  GetFields...
+        # # ScheduleField
+        # #  FieldType - Formula/Instance/Type
+        # #  IsHidden
+        # #  SheetColumnWidth
+        # #  ColumnHeading
+        # #  GetName
+        # #  FieldIndex
+        # #  ToString
+        # # need to add schedule to docname
+        # schedulename = "bob"
+        # file = "".join( x for x in schedulename if (x.isalnum() or x in "._- ()")) # toCADname but add Upper argument
+        # syntax = "-lprops"
     # Other ideas...
     # - All text on sheet, view, project
     # - Python from Dynamo
@@ -189,12 +190,12 @@ def to_mm(num):
 
 
 def toCADname(name):
-    keepcharacters = ('_','-','$')
+    keepCharacters = ('_','-','$')
     replacements = [('.','_'), (' - ','-'), (' ','-'), ('---','-'), ('--','-'), ('___','_'), ('__','_')]
     name = str(name).strip(' _-$').upper()
     for sub in replacements:
         name = name.replace(sub[0], sub[1])
-    name = "".join(c for c in name if c.isalnum() or c in keepcharacters)
+    name = "".join(c for c in name if c.isalnum() or c in keepCharacters)
     return name[:31]
 
 
