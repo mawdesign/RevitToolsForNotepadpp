@@ -1,0 +1,8 @@
+title: "Export\nRevit Server"
+tooltip: |
+  Exports Revit Server models list to Notepad++
+  Shift-click for options including export as back-up batch script.
+context: zero-doc
+engine:
+  clean: false
+  full_frame: true

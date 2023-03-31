@@ -1,4 +1,7 @@
 # RevitToolsForNotepadpp
+---
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 Code useful for working with Revit support files and formulas when using Notepad++
 ## pyRevit
 ### Installation
@@ -9,6 +12,13 @@ Either shift-click the Open Notepad++ button on the new pyMAW tab, or click the 
 ![Revit-20221202-468](https://user-images.githubusercontent.com/46857735/205176201-5a237456-4d4e-4453-bab1-e59cbcee9883.png)
 
 The only thing to set is the path to Notepad++ on your machine, when you choose to set the path it will try and suggest the most useful path, this only needs to be set once and will be saved in your pyRevit configuation options.
+### Tools
+#### Notepad++
+Opens Notepad++
+#### Open
+These tools open various text based Revit support files in Notepad++.
+#### Export
+These tools export data from the current family or project to a new file.
 ## PythonScript
 ### Installation
 PythonScript can be installed from the Plugins Admin in Notepad++, however this is will install an outdated version. To get the current or latest version go directly to the [Github/Releases](https://github.com/bruderstein/PythonScript/releases). It is recommended that you install the PythonScript_Full_* and PythonScript_TclTk_* versions to get the ability to display a gui which is used by some of these scripts.

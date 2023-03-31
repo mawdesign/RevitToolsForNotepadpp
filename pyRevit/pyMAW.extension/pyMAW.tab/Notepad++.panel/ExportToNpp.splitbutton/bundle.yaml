@@ -3,3 +3,4 @@ layout:
  - ExportSharedParameters
  - ExportFillPatterns
  - ExportKeynotes
+ - ExportRevitServer
