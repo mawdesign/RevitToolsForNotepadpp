@@ -13,21 +13,21 @@ isSelection = False
 #
 # Output:
 # if(
-#	test statement,
-#	if(
-#		and(
-#			one,
-#			two,
-#			three
-#		),
-#		"and true",
-#		if(
-#			another conditional test,
-#			"all true, really",
-#			"alternative"
-#		)
-#	),
-#	"otherwise"
+# 	test statement,
+# 	if(
+# 		and(
+# 			one,
+# 			two,
+# 			three
+# 		),
+# 		"and true",
+# 		if(
+# 			another conditional test,
+# 			"all true, really",
+# 			"alternative"
+# 		)
+# 	),
+# 	"otherwise"
 # )
 
 # input
@@ -39,11 +39,14 @@ else:
     editor.home()
     original_string = editor.getLine(lineNo)
 
+
 # pop quoted strings out
 def quote_sub(match):
     global quotes
     quotes.append(match[0])
-    return "{t[" + str(len(quotes)-1) + "]}"
+    return "{t[" + str(len(quotes) - 1) + "]}"
+
+
 new_string = re.sub(r"\".+?\"", quote_sub, original_string)
 
 # add returns
@@ -57,7 +60,7 @@ new_string = re.sub(r"\)\n,", "),", new_string)
 pos = 0
 extra_len = 0
 next_indent_inc = 0
-for st in re.finditer('\n', new_string + "\n"):
+for st in re.finditer("\n", new_string + "\n"):
     # parse indent level
     # ')' and ',' apply to current line
     # '(' applies from next line on
@@ -77,8 +80,8 @@ for st in re.finditer('\n', new_string + "\n"):
             indent_level += next_indent_inc
             next_indent_inc = 0
     # apply indent to start of current line
-    new_string = new_string[:pos] + indent*indent_level + new_string[pos:]
-    extra_len +=  len(indent) * indent_level
+    new_string = new_string[:pos] + indent * indent_level + new_string[pos:]
+    extra_len += len(indent) * indent_level
     pos = st.end() + extra_len
 
 # restore strings

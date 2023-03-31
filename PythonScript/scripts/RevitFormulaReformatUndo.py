@@ -10,21 +10,21 @@ isSelection = False
 
 # Input:
 # if(
-#	test statement,
-#	if(
-#		and(
-#			one,
-#			two,
-#			three
-#		),
-#		"and true",
-#		if(
-#			another conditional test,
-#			"all true, really",
-#			"alternative"
-#		)
-#	),
-#	"otherwise"
+# 	test statement,
+# 	if(
+# 		and(
+# 			one,
+# 			two,
+# 			three
+# 		),
+# 		"and true",
+# 		if(
+# 			another conditional test,
+# 			"all true, really",
+# 			"alternative"
+# 		)
+# 	),
+# 	"otherwise"
 # )
 #
 # Output:
@@ -39,11 +39,14 @@ else:
     editor.home()
     original_string = editor.getLine(lineNo)
 
+
 # pop quoted strings out
 def quote_sub(match):
     global quotes
     quotes.append(match[0])
-    return "{t[" + str(len(quotes)-1) + "]}"
+    return "{t[" + str(len(quotes) - 1) + "]}"
+
+
 new_string = re.sub(r"\".+?\"", quote_sub, original_string)
 
 # remove returns, tabs, and surplus whitespace

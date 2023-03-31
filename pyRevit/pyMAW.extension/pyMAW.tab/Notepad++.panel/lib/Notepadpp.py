@@ -2,30 +2,34 @@
 from pyrevit import revit
 from pyrevit import script
 import os
+
 # import subprocess
 
 
-def OpenNpp (path = "", options = "", exepath = None):
+def OpenNpp(path="", options="", exepath=None):
     logger = script.get_logger()
-    
+
     # get Notepad path
     if exepath == None:
         cfg = script.get_config("Notepad++")
-        exepath = cfg.get_option('notepadpath', os.path.join(os.environ["ProgramFiles"], "Notepad++", "Notepad++.exe"))
-    
+        exepath = cfg.get_option(
+            "notepadpath",
+            os.path.join(os.environ["ProgramFiles"], "Notepad++", "Notepad++.exe"),
+        )
     # open Notepad(++) with file
     if len(path) > 0:
         path = '"' + os.path.realpath(path) + '"'
     if not exepath is None and os.path.exists(exepath):
-        command = u'start "Notepad++" "{0}" {1} {2}'.format(exepath, options, path)
+        command = 'start "Notepad++" "{0}" {1} {2}'.format(exepath, options, path)
         logger.debug(command)
         os.system(command)
     else:
-        os.system('start notepad {0}'.format(path))
+        os.system("start notepad {0}".format(path))
 
 
-def Open (file = ""):
+def Open(file=""):
     from pyrevit import HOST_APP
+
     revit_ver = HOST_APP.version
 
     # get file path
@@ -40,19 +44,35 @@ def Open (file = ""):
         syntax = "-lprops"
     elif file == "user revit.ini":
         # get user revit.ini file path
-        path = os.path.expandvars("%APPDATA%\\Autodesk\\Revit\\Autodesk Revit {0}\\Revit.ini".format(revit_ver))
+        path = os.path.expandvars(
+            "%APPDATA%\\Autodesk\\Revit\\Autodesk Revit {0}\\Revit.ini".format(
+                revit_ver
+            )
+        )
         syntax = "-lini"
     elif file == "default revit.ini":
         # get default revit.ini file path
-        path = os.path.expandvars("%ALLUSERSPROFILE%\\Autodesk\\RVT {0}\\UserDataCache\\Revit.ini".format(revit_ver))
+        path = os.path.expandvars(
+            "%ALLUSERSPROFILE%\\Autodesk\\RVT {0}\\UserDataCache\\Revit.ini".format(
+                revit_ver
+            )
+        )
         syntax = "-lini"
     elif file == "keyboard shortcuts":
         # get keyboard shortcuts file path
-        path = os.path.expandvars("%APPDATA%\\Autodesk\\Revit\\Autodesk Revit {0}\\KeyboardShortcuts.xml".format(revit_ver))
+        path = os.path.expandvars(
+            "%APPDATA%\\Autodesk\\Revit\\Autodesk Revit {0}\\KeyboardShortcuts.xml".format(
+                revit_ver
+            )
+        )
         syntax = "-lxml"
     elif file == "revit server settings":
         # get revit server settings file path
-        path = os.path.expandvars("%PROGRAMDATA%\\Autodesk\\Revit Server {0}\\Config\\RSN.ini".format(revit_ver))
+        path = os.path.expandvars(
+            "%PROGRAMDATA%\\Autodesk\\Revit Server {0}\\Config\\RSN.ini".format(
+                revit_ver
+            )
+        )
         syntax = "-lini"
     elif file == "ifc export categories":
         # get IFC export category table file path
@@ -71,14 +91,14 @@ def Open (file = ""):
     else:
         path = ""
         syntax = ""
-    
     # open Notepad(++) with file
-    OpenNpp(path = path, options = syntax)
+    OpenNpp(path=path, options=syntax)
 
 
-def Export(file = ""):
+def Export(file=""):
     from pyrevit import forms
     import random
+
     text = ""
 
     # get values
@@ -87,13 +107,13 @@ def Export(file = ""):
         for fp in sorted(get_parameters(), key=lambda p: p["Name"].lower()):
             text += "[{}] {}\r\n".format(fp["Name"], str(fp["Type"]).upper())
             text += "{}\r\n".format(fp["Formula"]) if fp["Formula"] != "" else ""
-            text += "\r\n" 
+            text += "\r\n"
         syntax = "-llisp"
     elif file == "sharedparams":
         elements = get_sharedparamters()
         groups = {}
         groupnames = []
-        groupno = int(random.random()*6) * 10 + 30
+        groupno = int(random.random() * 6) * 10 + 30
         # export list of shared parameters as "[id] name"
         # allows Select by ID and manual delete in Revit
         for sp in sorted(elements, key=lambda sp: sp["Name"].lower()):
@@ -106,18 +126,29 @@ def Export(file = ""):
         # export shared parameters as shared parameter file
         # groups named by "Group parameter under" value
         # group numbers are random values > 40 to allow copy/paste into existing SP files with minimum overlap
-        text += ("\r\n\r\n# This is a Revit shared parameter file.\r\n"
+        text += (
+            "\r\n\r\n# This is a Revit shared parameter file.\r\n"
             "# Do not edit manually.\r\n"
             "*META	VERSION	MINVERSION\r\n"
             "META	2	1\r\n"
-            "*GROUP	ID	NAME\r\n")
+            "*GROUP	ID	NAME\r\n"
+        )
         for g in sorted(groupnames):
             text += "GROUP\t{}\t{}\r\n".format(groups[g], g)
-        text += "*PARAM	GUID	NAME	DATATYPE	DATACATEGORY	GROUP	VISIBLE	DESCRIPTION	USERMODIFIABLE	HIDEWHENNOVALUE\r\n" 
-        for sp in sorted(sorted(elements, key=lambda sp: sp["Name"].lower()), key=lambda e: e["Group"]):
-            text += "PARAM\t{}\t{}\t{}\t\t{}\t{}\t\t1\t{}\r\n".format(sp["GUID"], sp["Name"], str(sp["Type"]).upper(), groups[sp["Group"]],
-            1 if sp["Visible"] else 0, 1 if sp["HideWhenNoValue"] else 0)
-        text += "\r\n" 
+        text += "*PARAM	GUID	NAME	DATATYPE	DATACATEGORY	GROUP	VISIBLE	DESCRIPTION	USERMODIFIABLE	HIDEWHENNOVALUE\r\n"
+        for sp in sorted(
+            sorted(elements, key=lambda sp: sp["Name"].lower()),
+            key=lambda e: e["Group"],
+        ):
+            text += "PARAM\t{}\t{}\t{}\t\t{}\t{}\t\t1\t{}\r\n".format(
+                sp["GUID"],
+                sp["Name"],
+                str(sp["Type"]).upper(),
+                groups[sp["Group"]],
+                1 if sp["Visible"] else 0,
+                1 if sp["HideWhenNoValue"] else 0,
+            )
+        text += "\r\n"
         syntax = "-lprops"
     elif file == "fillpatterns":
         for fp in get_fillpatterns():
@@ -128,31 +159,31 @@ def Export(file = ""):
             text += "{}\t{}\t{}\r\n".format(kn["Key"], kn["Text"], kn["ParentKey"])
         syntax = "-lprops"
     # elif file == "schedule":
-        # # probably not useful if can't get at formulas ???
-        # # is a schedule selected or is the current view a schedule?
-        # # could be multiple schedules selected - should make it so can iterate through them all?
-        # # ViewSchedule.Export(folder, name, options)
-        # #  ViewScheduleExportOptions()
-        # # ScheduleSheetInstance
-        # # ViewSchedule
-        # #  Name
-        # #  Definition...
-        # # ScheduleDefinition
-        # #  GetFilters
-        # #  GetSortGroupFields
-        # #  GetFields...
-        # # ScheduleField
-        # #  FieldType - Formula/Instance/Type
-        # #  IsHidden
-        # #  SheetColumnWidth
-        # #  ColumnHeading
-        # #  GetName
-        # #  FieldIndex
-        # #  ToString
-        # # need to add schedule to docname
-        # schedulename = "bob"
-        # file = "".join( x for x in schedulename if (x.isalnum() or x in "._- ()")) # toCADname but add Upper argument
-        # syntax = "-lprops"
+    # # probably not useful if can't get at formulas ???
+    # # is a schedule selected or is the current view a schedule?
+    # # could be multiple schedules selected - should make it so can iterate through them all?
+    # # ViewSchedule.Export(folder, name, options)
+    # #  ViewScheduleExportOptions()
+    # # ScheduleSheetInstance
+    # # ViewSchedule
+    # #  Name
+    # #  Definition...
+    # # ScheduleDefinition
+    # #  GetFilters
+    # #  GetSortGroupFields
+    # #  GetFields...
+    # # ScheduleField
+    # #  FieldType - Formula/Instance/Type
+    # #  IsHidden
+    # #  SheetColumnWidth
+    # #  ColumnHeading
+    # #  GetName
+    # #  FieldIndex
+    # #  ToString
+    # # need to add schedule to docname
+    # schedulename = "bob"
+    # file = "".join( x for x in schedulename if (x.isalnum() or x in "._- ()")) # toCADname but add Upper argument
+    # syntax = "-lprops"
     # Other ideas...
     # - All text on sheet, view, project
     # - Python from Dynamo
@@ -162,23 +193,21 @@ def Export(file = ""):
     #    <Script>...</script>
     else:
         syntax = ""
-    
     # save file
     if text != "":
         docname = __revit__.ActiveUIDocument.Document.Title
-        if any([x in docname for x in ['.rfa', '.rvt']]):
-            docname = docname[:max(docname.rfind('.rfa'),docname.rfind('.rvt'))]
+        if any([x in docname for x in [".rfa", ".rvt"]]):
+            docname = docname[: max(docname.rfind(".rfa"), docname.rfind(".rvt"))]
         docname += "_" + file
         path = script.get_instance_data_file(docname)
         if path:
             tempfile = revit.files.write_text(path, text)
             revit.files.correct_text_encoding(path)
+        # open file
+        OpenNpp(path=path, options=syntax)
 
-    # open file
-        OpenNpp(path = path, options = syntax)
 
-
-def try_or(fn, default = None):
+def try_or(fn, default=None):
     try:
         return fn()
     except:
@@ -190,9 +219,17 @@ def to_mm(num):
 
 
 def toCADname(name):
-    keepCharacters = ('_','-','$')
-    replacements = [('.','_'), (' - ','-'), (' ','-'), ('---','-'), ('--','-'), ('___','_'), ('__','_')]
-    name = str(name).strip(' _-$').upper()
+    keepCharacters = ("_", "-", "$")
+    replacements = [
+        (".", "_"),
+        (" - ", "-"),
+        (" ", "-"),
+        ("---", "-"),
+        ("--", "-"),
+        ("___", "_"),
+        ("__", "_"),
+    ]
+    name = str(name).strip(" _-$").upper()
     for sub in replacements:
         name = name.replace(sub[0], sub[1])
     name = "".join(c for c in name if c.isalnum() or c in keepCharacters)
@@ -202,12 +239,18 @@ def toCADname(name):
 def get_parameters():
     # get list of parameters to be exported
     fm = revit.doc.FamilyManager
-    return [{"Name" : x.Definition.Name, 
-        "Formula" : x.Formula or "",
-        "Type" : x.Definition.ParameterType if str(x.Definition.ParameterType) !="Invalid" else "Built-in",
-        "isShared" : x.IsShared,
-        "GUID" : try_or(lambda: x.GUID, ""),
-        } for x in fm.GetParameters()]
+    return [
+        {
+            "Name": x.Definition.Name,
+            "Formula": x.Formula or "",
+            "Type": x.Definition.ParameterType
+            if str(x.Definition.ParameterType) != "Invalid"
+            else "Built-in",
+            "isShared": x.IsShared,
+            "GUID": try_or(lambda: x.GUID, ""),
+        }
+        for x in fm.GetParameters()
+    ]
 
     # Other parameter properties:
     #
@@ -225,7 +268,7 @@ def get_parameters():
     # associatedparams.append(assocparams)
     # assocelems = list()
     # for assoc in assocparams:
-        # assocelems.append(assoc.Element)
+    # assocelems.append(assoc.Element)
     # associatedelements.append(assocelems)
     # canassignformula.append(param.CanAssignFormula)
 
@@ -233,6 +276,7 @@ def get_parameters():
 def get_sharedparamters():
     # get shared parameters from project
     from pyrevit import DB
+
     doc = revit.doc
     sharedparams = []
 
@@ -244,30 +288,42 @@ def get_sharedparamters():
 
     for sp in sp_collector:
         sp_def = sp.GetDefinition()
-        sharedparams.append({"Name" : sp.Name,
-            "Id" : sp.Id,
-            "GUID" : sp.GuidValue,
-            "Group" : str(sp_def.ParameterGroup).replace("PG_","").replace("INVALID","OTHER").replace("AELECTRICAL","ELECTRICAL").replace("ADSK_","").replace("_"," ").title(),
-            "Type" : sp_def.ParameterType,
-            "Visible" : sp_def.Visible,
-            "HideWhenNoValue" : sp.ShouldHideWhenNoValue(),
-            })
+        sharedparams.append(
+            {
+                "Name": sp.Name,
+                "Id": sp.Id,
+                "GUID": sp.GuidValue,
+                "Group": str(sp_def.ParameterGroup)
+                .replace("PG_", "")
+                .replace("INVALID", "OTHER")
+                .replace("AELECTRICAL", "ELECTRICAL")
+                .replace("ADSK_", "")
+                .replace("_", " ")
+                .title(),
+                "Type": sp_def.ParameterType,
+                "Visible": sp_def.Visible,
+                "HideWhenNoValue": sp.ShouldHideWhenNoValue(),
+            }
+        )
     return sharedparams
 
 
-def get_fillpatterns ():
-    #get fill patterns from project and convert to .pat format
+def get_fillpatterns():
+    # get fill patterns from project and convert to .pat format
     from pyrevit import DB
     import math
+
     doc = revit.doc
     result = []
-    
+
     # header
     result.append(";%UNITS=MM")
     result.append(";%VERSION=3.0")
     result.append(";;Exported by pyMAW, based on script by Sean Page 2022")
-    result.append(";;https://forum.dynamobim.com/t/export-fill-pattern-pat-file-from-revit/83014")
-    result.append(';;')
+    result.append(
+        ";;https://forum.dynamobim.com/t/export-fill-pattern-pat-file-from-revit/83014"
+    )
+    result.append(";;")
 
     fp_collector = (
         DB.FilteredElementCollector(doc)
@@ -280,31 +336,38 @@ def get_fillpatterns ():
         fp_def = fp.GetFillPattern()
 
         grids = fp_def.GetFillGrids()
-        if not(fp_def.IsSolidFill or len(grids) == 0):
+        if not (fp_def.IsSolidFill or len(grids) == 0):
             result.append("*{}, {}".format(toCADname(fp_name), fp_name))
             result.append(";%TYPE={}".format(str(fp_def.Target).upper()))
             for grid in grids:
                 segs = grid.GetSegments()
-                string = "{},{},{},{},{}".format(math.degrees(grid.Angle),to_mm(grid.Origin[0]),to_mm(grid.Origin[1]),to_mm(grid.Shift),to_mm(grid.Offset))
+                string = "{},{},{},{},{}".format(
+                    math.degrees(grid.Angle),
+                    to_mm(grid.Origin[0]),
+                    to_mm(grid.Origin[1]),
+                    to_mm(grid.Shift),
+                    to_mm(grid.Offset),
+                )
                 if len(segs) == 0:
                     string += ",0.0,0.0"
                 elif len(segs) == 2:
-                    string += ",{},-{}".format(to_mm(segs[0]),to_mm(segs[1]))
+                    string += ",{},-{}".format(to_mm(segs[0]), to_mm(segs[1]))
                 else:
-                    string += ",{},{}".format(to_mm(segs[0]),to_mm(segs[1]))
+                    string += ",{},{}".format(to_mm(segs[0]), to_mm(segs[1]))
                 result.append(string)
-            result.append(';;')
+            result.append(";;")
     return result
 
 
 def get_keynotes():
     # get shared parameters from project
     from pyrevit import DB
+
     doc = revit.doc
     keynotes = []
 
     keynotetable = DB.KeynoteTable.GetKeynoteTable(doc)
     keynotelist = keynotetable.GetKeyBasedTreeEntries()
     for x in keynotelist:
-        keynotes.append({'Key' : x.Key, 'ParentKey' : x.ParentKey, 'Text' : x.KeynoteText})
+        keynotes.append({"Key": x.Key, "ParentKey": x.ParentKey, "Text": x.KeynoteText})
     return keynotes
