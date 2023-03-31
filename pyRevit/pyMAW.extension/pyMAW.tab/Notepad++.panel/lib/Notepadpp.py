@@ -40,19 +40,19 @@ def Open (file = ""):
         syntax = "-lprops"
     elif file == "user revit.ini":
         # get user revit.ini file path
-        path = os.path.expandvars("%APPDATA%\Autodesk\Revit\Autodesk Revit {0}\Revit.ini".format(revit_ver))
+        path = os.path.expandvars("%APPDATA%\\Autodesk\\Revit\\Autodesk Revit {0}\\Revit.ini".format(revit_ver))
         syntax = "-lini"
     elif file == "default revit.ini":
         # get default revit.ini file path
-        path = os.path.expandvars("%ALLUSERSPROFILE%\Autodesk\RVT {0}\UserDataCache\Revit.ini".format(revit_ver))
+        path = os.path.expandvars("%ALLUSERSPROFILE%\\Autodesk\\RVT {0}\\UserDataCache\\Revit.ini".format(revit_ver))
         syntax = "-lini"
     elif file == "keyboard shortcuts":
         # get keyboard shortcuts file path
-        path = os.path.expandvars("%APPDATA%\Autodesk\Revit\Autodesk Revit {0}\KeyboardShortcuts.xml".format(revit_ver))
+        path = os.path.expandvars("%APPDATA%\\Autodesk\\Revit\\Autodesk Revit {0}\\KeyboardShortcuts.xml".format(revit_ver))
         syntax = "-lxml"
     elif file == "revit server settings":
         # get revit server settings file path
-        path = os.path.expandvars("%PROGRAMDATA%\Autodesk\Revit Server {0}\Config\RSN.ini".format(revit_ver))
+        path = os.path.expandvars("%PROGRAMDATA%\\Autodesk\\Revit Server {0}\\Config\\RSN.ini".format(revit_ver))
         syntax = "-lini"
     elif file == "ifc export categories":
         # get IFC export category table file path
