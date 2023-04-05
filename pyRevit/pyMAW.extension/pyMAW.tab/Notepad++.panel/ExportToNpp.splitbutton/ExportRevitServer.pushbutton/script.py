@@ -15,7 +15,7 @@ import Notepadpp as npp
 
 cfg = script.get_config("Notepad++")
 rs_export_format = cfg.get_option("rs_export_format", "List")
-rs_export_dateafter = cfg.get_option("rs_export_dateafter", "2023-03-29")
+rs_export_dateafter = cfg.get_option("rs_export_dateafter", "")
 if rs_export_dateafter != "":
     chk_minfo = True
 else:
