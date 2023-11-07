@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pyrevit import revit
 from pyrevit import script
-import os
+import os, codecs
 
 # import subprocess
 
@@ -100,6 +100,7 @@ def Export(file=""):
     import random
 
     text = ""
+    encoding = "utf_8"
 
     # get values
     if file == "formula":
@@ -158,6 +159,19 @@ def Export(file=""):
         for kn in sorted(get_keynotes(), key=lambda k: k["Key"]):
             text += "{}\t{}\t{}\r\n".format(kn["Key"], kn["Text"], kn["ParentKey"])
         syntax = "-lprops"
+    elif file == "typecatalog":
+        # text = "," + ",".join(sorted(get_typecatalog(), key=lambda k: k["Name"])["TypeCatalogString"]).
+        text = ","
+        header, body = get_typecatalog()
+        for tc in header:
+            if tc["HasTypeValues"] == True:
+                text += tc["TypeCatalogString"] + ","
+            # text += str(tc) + "\r\n"
+        text = text[:-1] + "\r\n"
+        for tc in body:
+            text += tc + "\r\n"
+        syntax = ""
+        encoding = "utf_16"
     # elif file == "schedule":
     # # probably not useful if can't get at formulas ???
     # # is a schedule selected or is the current view a schedule?
@@ -201,8 +215,10 @@ def Export(file=""):
         docname += "_" + file
         path = script.get_instance_data_file(docname)
         if path:
-            tempfile = revit.files.write_text(path, text)
-            revit.files.correct_text_encoding(path)
+            # tempfile = revit.files.write_text(path, text)
+            # revit.files.correct_text_encoding(path)
+            with codecs.open(path, 'w', encoding=encoding) as text_file:
+                text_file.write(text)
         # open file
         OpenNpp(path=path, options=syntax)
 
@@ -242,12 +258,14 @@ def get_parameters():
     return [
         {
             "Name": x.Definition.Name,
+            "isDeterminedByFormula": x.IsDeterminedByFormula,
             "Formula": x.Formula or "",
             "Type": x.Definition.ParameterType
             if str(x.Definition.ParameterType) != "Invalid"
             else "Built-in",
             "isShared": x.IsShared,
             "GUID": try_or(lambda: x.GUID, ""),
+            "Parameter": x,
         }
         for x in fm.GetParameters()
     ]
@@ -255,7 +273,6 @@ def get_parameters():
     # Other parameter properties:
     #
     # pgroup.append(param.Definition.ParameterGroup)
-    # utype.append(param.Definition.UnitType)
     # try: dutype.append(param.DisplayUnitType)
     # except: dutype.append(None)
     # stype.append(param.StorageType)
@@ -263,7 +280,6 @@ def get_parameters():
     # isreporting.append(param.IsReporting)
     # isreadonly.append(param.IsReadOnly)
     # usermodifiable.append(param.UserModifiable)
-    # determinedbyformula.append(param.IsDeterminedByFormula)
     # assocparams = param.AssociatedParameters
     # associatedparams.append(assocparams)
     # assocelems = list()
@@ -306,6 +322,60 @@ def get_sharedparamters():
             }
         )
     return sharedparams
+
+
+def get_typecatalog():
+    # get type catalog values from family document
+    from pyrevit import DB
+    fm = revit.doc.FamilyManager
+    u = DB.Units(DB.UnitSystem.Metric)
+    tcTypes = []
+    fp = get_parameters()
+    fp.sort(key=lambda k: k["Name"])
+    for i, p in enumerate(fp):
+        if p["isDeterminedByFormula"] == False:
+            ut = p["Parameter"].Definition.UnitType
+            fo = u.GetFormatOptions(ut)
+            s1 = DB.UnitUtils.GetTypeCatalogString(ut)
+            s2 = DB.UnitUtils.GetTypeCatalogString(fo.DisplayUnits)
+            if s1 == "NUMBER" and s2 == "GENERAL":
+                s1 = "OTHER"
+                s2 = ""
+            fp[i]["TypeCatalogString"] = p["Name"] + "##" + s1 + "##" + s2
+    text = ""
+    for i, pa in enumerate(fp):
+        hasVal = False
+        if pa["isDeterminedByFormula"] == False:
+            for ft in fm.Types:
+                if ft.HasValue(pa["Parameter"]):
+                    hasVal = True
+        fp[i]["HasTypeValues"] = hasVal
+    for ft in fm.Types:
+        name = ft.Name
+        text = name
+        for i, pa in enumerate(fp):
+            if pa["HasTypeValues"] == True:
+                p = pa["Parameter"]
+                val = ""
+                if ft.HasValue(pa["Parameter"]):
+                    val = ft.AsValueString(p)
+                    if p.StorageType == DB.StorageType.String:
+                        val = '"{}"'.format(ft.AsString(p)) # (string)"
+                        if val == '""':
+                            val = ''
+                    elif p.StorageType == DB.StorageType.ElementId:
+                        pid = ft.AsElementId(p)
+                        ele = revit.doc.GetElement(pid)
+                        fName = ele.Family.Name
+                        eName = DB.Element.Name.__get__(ele)
+                        val = '"{} : {}"'.format(fName, eName) #str(pid) + " (" + + ")"
+                    elif p.StorageType == DB.StorageType.Integer:
+                        val = str(ft.AsInteger(p)) #+ " (int)";
+                    elif val is None and p.StorageType == DB.StorageType.Double:
+                        val = str(ft.AsDouble(p)) #+ " (double)"
+                text += "," + val
+        tcTypes.append(text)
+    return fp, tcTypes
 
 
 def get_fillpatterns():
@@ -371,3 +441,5 @@ def get_keynotes():
     for x in keynotelist:
         keynotes.append({"Key": x.Key, "ParentKey": x.ParentKey, "Text": x.KeynoteText})
     return keynotes
+
+
