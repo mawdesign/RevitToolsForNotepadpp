@@ -217,7 +217,7 @@ def Export(file=""):
         if path:
             # tempfile = revit.files.write_text(path, text)
             # revit.files.correct_text_encoding(path)
-            with codecs.open(path, 'w', encoding=encoding) as text_file:
+            with codecs.open(path, "w", encoding=encoding) as text_file:
                 text_file.write(text)
         # open file
         OpenNpp(path=path, options=syntax)
@@ -327,6 +327,7 @@ def get_sharedparamters():
 def get_typecatalog():
     # get type catalog values from family document
     from pyrevit import DB
+
     fm = revit.doc.FamilyManager
     u = DB.Units(DB.UnitSystem.Metric)
     tcTypes = []
@@ -360,7 +361,7 @@ def get_typecatalog():
                 if ft.HasValue(pa["Parameter"]):
                     val = ft.AsValueString(p)
                     if p.StorageType == DB.StorageType.String:
-                        val = '"{}"'.format(ft.AsString(p)) # (string)"
+                        val = '"{}"'.format(ft.AsString(p))
                         if val == '""':
                             val = ''
                     elif p.StorageType == DB.StorageType.ElementId:
@@ -368,11 +369,13 @@ def get_typecatalog():
                         ele = revit.doc.GetElement(pid)
                         fName = ele.Family.Name
                         eName = DB.Element.Name.__get__(ele)
-                        val = '"{} : {}"'.format(fName, eName) #str(pid) + " (" + + ")"
+                        val = '"{} : {}"'.format(
+                            fName, eName
+                        )
                     elif p.StorageType == DB.StorageType.Integer:
-                        val = str(ft.AsInteger(p)) #+ " (int)";
+                        val = str(ft.AsInteger(p))
                     elif val is None and p.StorageType == DB.StorageType.Double:
-                        val = str(ft.AsDouble(p)) #+ " (double)"
+                        val = str(ft.AsDouble(p))
                 text += "," + val
         tcTypes.append(text)
     return fp, tcTypes
@@ -441,5 +444,4 @@ def get_keynotes():
     for x in keynotelist:
         keynotes.append({"Key": x.Key, "ParentKey": x.ParentKey, "Text": x.KeynoteText})
     return keynotes
-
 
