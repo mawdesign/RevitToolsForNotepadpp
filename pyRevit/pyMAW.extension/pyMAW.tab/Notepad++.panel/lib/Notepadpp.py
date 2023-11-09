@@ -363,15 +363,13 @@ def get_typecatalog():
                     if p.StorageType == DB.StorageType.String:
                         val = '"{}"'.format(ft.AsString(p))
                         if val == '""':
-                            val = ''
+                            val = ""
                     elif p.StorageType == DB.StorageType.ElementId:
                         pid = ft.AsElementId(p)
                         ele = revit.doc.GetElement(pid)
                         fName = ele.Family.Name
                         eName = DB.Element.Name.__get__(ele)
-                        val = '"{} : {}"'.format(
-                            fName, eName
-                        )
+                        val = '"{} : {}"'.format(fName, eName)
                     elif p.StorageType == DB.StorageType.Integer:
                         val = str(ft.AsInteger(p))
                     elif val is None and p.StorageType == DB.StorageType.Double:
