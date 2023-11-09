@@ -442,4 +442,3 @@ def get_keynotes():
     for x in keynotelist:
         keynotes.append({"Key": x.Key, "ParentKey": x.ParentKey, "Text": x.KeynoteText})
     return keynotes
-
