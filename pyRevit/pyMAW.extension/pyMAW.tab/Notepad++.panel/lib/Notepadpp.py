@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pyrevit import revit
 from pyrevit import script
+from pyrevit import HOST_APP
 import os, codecs
 
 # import subprocess
@@ -254,21 +255,33 @@ def toCADname(name):
 
 def get_parameters():
     # get list of parameters to be exported
+    from pyrevit import DB
+
     fm = revit.doc.FamilyManager
-    return [
-        {
-            "Name": x.Definition.Name,
-            "isDeterminedByFormula": x.IsDeterminedByFormula,
-            "Formula": x.Formula or "",
-            "Type": x.Definition.ParameterType
-            if str(x.Definition.ParameterType) != "Invalid"
-            else "Built-in",
-            "isShared": x.IsShared,
-            "GUID": try_or(lambda: x.GUID, ""),
-            "Parameter": x,
-        }
-        for x in fm.GetParameters()
-    ]
+    params = []
+    
+    for pr in fm.GetParameters():
+        pr_def = pr.Definition
+        if HOST_APP.is_newer_than(2022):
+            t = pr_def.GetDataType()
+            pr_type = DB.LabelUtils.GetLabelForSpec(t).replace("/", "")
+        else:
+            pr_type = pr_def.ParameterType
+            if str(pr_type) == "Invalid":
+                pr_type = "Built-in"
+        params.append(
+            {
+                "Name": pr_def.Name,
+                "isDeterminedByFormula": pr.IsDeterminedByFormula,
+                "Formula": pr.Formula or "",
+                "Type": pr_type,
+                "isShared": pr.IsShared,
+                "GUID": try_or(lambda: pr.GUID, ""),
+                "Parameter": pr,
+            }
+        )
+
+    return params
 
     # Other parameter properties:
     #
@@ -304,6 +317,12 @@ def get_sharedparamters():
 
     for sp in sp_collector:
         sp_def = sp.GetDefinition()
+        if HOST_APP.is_newer_than(2022):
+            t = sp_def.GetDataType()
+            sp_type = DB.LabelUtils.GetLabelForSpec(t).replace("/", "")
+        else:
+            sp_type = sp_def.ParameterType
+
         sharedparams.append(
             {
                 "Name": sp.Name,
@@ -316,7 +335,7 @@ def get_sharedparamters():
                 .replace("ADSK_", "")
                 .replace("_", " ")
                 .title(),
-                "Type": sp_def.ParameterType,
+                "Type": sp_type,
                 "Visible": sp_def.Visible,
                 "HideWhenNoValue": sp.ShouldHideWhenNoValue(),
             }
@@ -442,3 +461,4 @@ def get_keynotes():
     for x in keynotelist:
         keynotes.append({"Key": x.Key, "ParentKey": x.ParentKey, "Text": x.KeynoteText})
     return keynotes
+
