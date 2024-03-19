@@ -112,14 +112,14 @@ def Export(file=""):
             text += "\r\n"
         syntax = "-llisp"
     elif file == "sharedparams":
-        elements = get_sharedparamters()
+        elements = get_sharedparameters()
         groups = {}
         groupnames = []
         groupno = int(random.random() * 6) * 10 + 30
-        # export list of shared parameters as "[id] name"
+        # export list of shared parameters as "[id] name (GUID)"
         # allows Select by ID and manual delete in Revit
         for sp in sorted(elements, key=lambda sp: sp["Name"].lower()):
-            text += "[{}]\t{}\r\n".format(sp["Id"], sp["Name"])
+            text += "[{}]\t{}\t({})\r\n".format(sp["Id"], sp["Name"], sp["GUID"])
             if not sp["Group"] in groupnames:
                 groupnames.append(sp["Group"])
         for g in sorted(groupnames):
@@ -149,6 +149,28 @@ def Export(file=""):
                 groups[sp["Group"]],
                 1 if sp["Visible"] else 0,
                 1 if sp["HideWhenNoValue"] else 0,
+            )
+        text += "\r\n"
+        syntax = "-lprops"
+    elif file == "familyparams":
+        elements = sorted(get_loadedfamilyparameters(), key=lambda k: k["Name"])
+        for fp in elements:
+            text += "[{}]\r\n".format(fp["Name"])
+            for p in sorted(fp["Parameters"], key=lambda k: k["Name"]):
+                text += "{}\t({})\r\n".format(
+                    p["Name"],
+                    p["GUID"],
+                )
+        text += "\r\n"
+        syntax = "-lprops"
+    elif file == "projectparams":
+        elements = sorted(get_projectparameters(), key=lambda k: k["Name"])
+        for pp in elements:
+            text += "[{}]\t{}\t{}\t({})\r\n".format(
+                pp["Id"], 
+                pp["Type or Instance"],
+                pp["Name"], 
+                shorten(", ".join(pp["Categories"]), width=100, placeholder="…"),
             )
         text += "\r\n"
         syntax = "-lprops"
@@ -235,6 +257,11 @@ def to_mm(num):
     return num * 304.8
 
 
+def shorten(text, width=80, placeholder="…"):
+    text = (text[:(width - 1)] + placeholder) if len(text) > width else text
+    return text
+
+
 def toCADname(name):
     keepCharacters = ("_", "-", "$")
     replacements = [
@@ -302,7 +329,7 @@ def get_parameters():
     # canassignformula.append(param.CanAssignFormula)
 
 
-def get_sharedparamters():
+def get_sharedparameters():
     # get shared parameters from project
     from pyrevit import DB
 
@@ -341,6 +368,103 @@ def get_sharedparamters():
             }
         )
     return sharedparams
+
+
+def get_loadedfamilyparameters():
+    # get shared parameters from families loaded into the project
+    from pyrevit import DB
+
+    # Retrieve current document
+    doc = revit.doc
+
+    # Retrieve all families in current doc
+    families = (
+        DB.FilteredElementCollector(doc).OfClass(DB.Family)
+    )
+
+    # Filter the editable families and output result
+    fmparams = []
+
+    #examine each family
+    for f in families:
+        #only look at loadable familes
+        if (f.IsEditable):
+            pa = []
+            fi = []
+            #get types
+            fs = f.GetFamilySymbolIds()
+            insts = False
+            #get type parameters
+            for t in fs:
+                s = doc.GetElement(t)
+                fp = s.GetOrderedParameters()
+                if not insts:
+                    #check if there are placed instances
+                    filter = DB.FamilyInstanceFilter(doc,t)
+                    fam_insts = DB.FilteredElementCollector(doc).WherePasses(filter).ToElements()
+                    #if so get the instance parameters
+                    if len(fam_insts) > 0:
+                        insts = True
+                        for i in fam_insts:
+                            fi = i.Parameters
+            if insts:
+                #filter for shared only
+                for p in fp:
+                    if p.IsShared:
+                        pa.append(
+                            {
+                                "Name" : p.Definition.Name,
+                                "GUID" : p.GUID,
+                            }
+                        )
+            else:
+                famDoc = doc.EditFamily(f)
+                fi = famDoc.FamilyManager.Parameters
+            for p in fi:
+                #filter for shared only
+                if p.IsShared:
+                    pa.append(
+                        {
+                            "Name" : p.Definition.Name,
+                            "GUID" : p.GUID,
+                        }
+                    )
+            if not insts:
+                famDoc.Close(False)
+            #if parameters exist add to list
+            if len(pa) > 0:
+                fmparams.append(
+                    {
+                        "Name" : f.Name,
+                        "Parameters" : pa
+                    }
+                )
+
+    return fmparams
+
+
+def get_projectparameters():
+    # get list of project parameters from current document
+
+    doc = revit.doc
+    projectparams = []
+    
+    parambindings = doc.ParameterBindings.ForwardIterator()
+    
+    while parambindings.MoveNext():
+        cats = []
+        for p in parambindings.Current.Categories:
+            cats.append(p.Name)
+        projectparams.append(
+            {
+                "Name": parambindings.Key.Name,
+                "Id": parambindings.Key.Id,
+                "Type or Instance": parambindings.Current.GetType().Name[:-7],
+                "Categories": cats,
+            }
+        )
+
+    return projectparams
 
 
 def get_typecatalog():
@@ -450,7 +574,7 @@ def get_fillpatterns():
 
 
 def get_keynotes():
-    # get shared parameters from project
+    # get keynotes from project
     from pyrevit import DB
 
     doc = revit.doc

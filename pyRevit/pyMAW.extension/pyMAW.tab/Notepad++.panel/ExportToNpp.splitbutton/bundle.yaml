@@ -1,6 +1,8 @@
 layout:
  - ExportFamilyParameters
  - ExportSharedParameters
+ - ExportProjectParameters
+ - ExportLoadedFamilyParameters
  - ExportTypeCatalog
  - ExportFillPatterns
  - ExportKeynotes
