@@ -167,9 +167,9 @@ def Export(file=""):
         elements = sorted(get_projectparameters(), key=lambda k: k["Name"])
         for pp in elements:
             text += "[{}]\t{}\t{}\t({})\r\n".format(
-                pp["Id"], 
+                pp["Id"],
                 pp["Type or Instance"],
-                pp["Name"], 
+                pp["Name"],
                 shorten(", ".join(pp["Categories"]), width=100, placeholder="…"),
             )
         text += "\r\n"
@@ -258,7 +258,7 @@ def to_mm(num):
 
 
 def shorten(text, width=80, placeholder="…"):
-    text = (text[:(width - 1)] + placeholder) if len(text) > width else text
+    text = (text[: (width - 1)] + placeholder) if len(text) > width else text
     return text
 
 
@@ -286,7 +286,7 @@ def get_parameters():
 
     fm = revit.doc.FamilyManager
     params = []
-    
+
     for pr in fm.GetParameters():
         pr_def = pr.Definition
         if HOST_APP.is_newer_than(2022):
@@ -378,67 +378,64 @@ def get_loadedfamilyparameters():
     doc = revit.doc
 
     # Retrieve all families in current doc
-    families = (
-        DB.FilteredElementCollector(doc).OfClass(DB.Family)
-    )
+    families = DB.FilteredElementCollector(doc).OfClass(DB.Family)
 
     # Filter the editable families and output result
     fmparams = []
 
-    #examine each family
+    # examine each family
     for f in families:
-        #only look at loadable familes
-        if (f.IsEditable):
+        # only look at loadable familes
+        if f.IsEditable:
             pa = []
             fi = []
-            #get types
+            # get types
             fs = f.GetFamilySymbolIds()
             insts = False
-            #get type parameters
+            # get type parameters
             for t in fs:
                 s = doc.GetElement(t)
                 fp = s.GetOrderedParameters()
                 if not insts:
-                    #check if there are placed instances
-                    filter = DB.FamilyInstanceFilter(doc,t)
-                    fam_insts = DB.FilteredElementCollector(doc).WherePasses(filter).ToElements()
-                    #if so get the instance parameters
+                    # check if there are placed instances
+                    filter = DB.FamilyInstanceFilter(doc, t)
+                    fam_insts = (
+                        DB.FilteredElementCollector(doc)
+                        .WherePasses(filter)
+                        .ToElements()
+                    )
+                    # if so get the instance parameters
                     if len(fam_insts) > 0:
                         insts = True
                         for i in fam_insts:
                             fi = i.Parameters
             if insts:
-                #filter for shared only
+                # filter for shared only
                 for p in fp:
                     if p.IsShared:
                         pa.append(
                             {
-                                "Name" : p.Definition.Name,
-                                "GUID" : p.GUID,
+                                "Name": p.Definition.Name,
+                                "GUID": p.GUID,
                             }
                         )
             else:
                 famDoc = doc.EditFamily(f)
                 fi = famDoc.FamilyManager.Parameters
             for p in fi:
-                #filter for shared only
+                # filter for shared only
                 if p.IsShared:
                     pa.append(
                         {
-                            "Name" : p.Definition.Name,
-                            "GUID" : p.GUID,
+                            "Name": p.Definition.Name,
+                            "GUID": p.GUID,
                         }
                     )
             if not insts:
                 famDoc.Close(False)
-            #if parameters exist add to list
+            # if parameters exist add to list
             if len(pa) > 0:
-                fmparams.append(
-                    {
-                        "Name" : f.Name,
-                        "Parameters" : pa
-                    }
-                )
+                fmparams.append({"Name": f.Name, "Parameters": pa})
 
     return fmparams
 
@@ -448,9 +445,9 @@ def get_projectparameters():
 
     doc = revit.doc
     projectparams = []
-    
+
     parambindings = doc.ParameterBindings.ForwardIterator()
-    
+
     while parambindings.MoveNext():
         cats = []
         for p in parambindings.Current.Categories:
@@ -585,4 +582,3 @@ def get_keynotes():
     for x in keynotelist:
         keynotes.append({"Key": x.Key, "ParentKey": x.ParentKey, "Text": x.KeynoteText})
     return keynotes
-
