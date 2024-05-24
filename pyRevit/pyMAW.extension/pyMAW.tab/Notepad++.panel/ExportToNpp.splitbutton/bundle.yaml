@@ -6,4 +6,5 @@ layout:
  - ExportTypeCatalog
  - ExportFillPatterns
  - ExportKeynotes
+ - ExportCloudCache
  - ExportRevitServer

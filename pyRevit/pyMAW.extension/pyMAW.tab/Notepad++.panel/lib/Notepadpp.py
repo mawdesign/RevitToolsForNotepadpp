@@ -166,10 +166,12 @@ def Export(file=""):
     elif file == "projectparams":
         elements = sorted(get_projectparameters(), key=lambda k: k["Name"])
         for pp in elements:
-            text += "[{}]\t{}\t{}\t({})\r\n".format(
+            text += "[{}]\t{}\t{}\t{}\t{}\t({})\r\n".format(
                 pp["Id"], 
-                pp["Type or Instance"],
                 pp["Name"], 
+                pp["Type"],
+                pp["Group"],
+                pp["Type or Instance"],
                 shorten(", ".join(pp["Categories"]), width=100, placeholder="…"),
             )
         text += "\r\n"
@@ -455,10 +457,20 @@ def get_projectparameters():
         cats = []
         for p in parambindings.Current.Categories:
             cats.append(p.Name)
+        if HOST_APP.is_newer_than(2022):
+            t = parambindings.Key.GetDataType()
+            pp_type = DB.LabelUtils.GetLabelForSpec(t).replace("/", "")
+        else:
+            pp_type = str(parambindings.Key.ParameterType)
+            if pp_type == "Invalid":
+                pp_type = "Built-in"
+
         projectparams.append(
             {
                 "Name": parambindings.Key.Name,
                 "Id": parambindings.Key.Id,
+                "Type": pp_type,
+                "Group": str(parambindings.Key.ParameterGroup).replace("PG_", ""),
                 "Type or Instance": parambindings.Current.GetType().Name[:-7],
                 "Categories": cats,
             }
