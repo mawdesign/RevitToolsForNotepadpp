@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from pyrevit import revit
 from pyrevit import script
 from pyrevit import HOST_APP
@@ -7,10 +8,26 @@ import os, codecs
 # import subprocess
 
 
+dynamoVerList = {
+    "2020.0": "2.3",
+    "2020.1": "2.3",
+    "2020.2": "2.3",
+    "2021.0": "2.5",
+    "2021.1": "2.6",
+    "2022.0": "2.10",
+    "2022.1": "2.12",
+    "2023": "2.13",
+    "2023.1": "2.16",
+    "2024": "2.17",
+    "2024.1": "2.18",
+}
+
+
 def OpenNpp(path="", options="", exepath=None):
     logger = script.get_logger()
 
     # get Notepad path
+
     if exepath == None:
         cfg = script.get_config("Notepad++")
         exepath = cfg.get_option(
@@ -18,6 +35,7 @@ def OpenNpp(path="", options="", exepath=None):
             os.path.join(os.environ["ProgramFiles"], "Notepad++", "Notepad++.exe"),
         )
     # open Notepad(++) with file
+
     if len(path) > 0:
         path = '"' + os.path.realpath(path) + '"'
     if not exepath is None and os.path.exists(exepath):
@@ -34,17 +52,21 @@ def Open(file=""):
     revit_ver = HOST_APP.version
 
     # get file path
+
     if file == "keynote":
         # get keynote file path
+
         path = revit.query.get_local_keynote_file(doc=revit.doc)
         syntax = "-lprops"
     elif file == "shared parameters":
         # get shared parameters file path
+
         app = __revit__.Application
         path = app.SharedParametersFilename
         syntax = "-lprops"
     elif file == "user revit.ini":
         # get user revit.ini file path
+
         path = os.path.expandvars(
             "%APPDATA%\\Autodesk\\Revit\\Autodesk Revit {0}\\Revit.ini".format(
                 revit_ver
@@ -53,6 +75,7 @@ def Open(file=""):
         syntax = "-lini"
     elif file == "default revit.ini":
         # get default revit.ini file path
+
         path = os.path.expandvars(
             "%ALLUSERSPROFILE%\\Autodesk\\RVT {0}\\UserDataCache\\Revit.ini".format(
                 revit_ver
@@ -61,14 +84,22 @@ def Open(file=""):
         syntax = "-lini"
     elif file == "keyboard shortcuts":
         # get keyboard shortcuts file path
+
         path = os.path.expandvars(
             "%APPDATA%\\Autodesk\\Revit\\Autodesk Revit {0}\\KeyboardShortcuts.xml".format(
                 revit_ver
             )
         )
         syntax = "-lxml"
+    if file == "dynamo settings":
+        # get dynamo settings file path
+
+        path = os.getenv("APPDATA") + "\\Dynamo\\Dynamo Revit\\"
+        path += dynamoVerList[HOST_APP.subversion] + "\\DynamoSettings.xml"
+        syntax = "-lxml"
     elif file == "revit server settings":
         # get revit server settings file path
+
         path = os.path.expandvars(
             "%PROGRAMDATA%\\Autodesk\\Revit Server {0}\\Config\\RSN.ini".format(
                 revit_ver
@@ -77,11 +108,13 @@ def Open(file=""):
         syntax = "-lini"
     elif file == "ifc export categories":
         # get IFC export category table file path
+
         app = __revit__.Application
         path = app.ExportIFCCategoryTable
         syntax = "-lpowershell"
     elif file == "current journal":
         # get journal file file path
+
         path = revit.get_current_journal_file()
         syntax = "-lvb -n9999999999"
     # other ideas:
@@ -89,10 +122,12 @@ def Open(file=""):
     # - Analytic Construction file
     # - Uniformat Classifications
     # - pat files
+
     else:
         path = ""
         syntax = ""
     # open Notepad(++) with file
+
     OpenNpp(path=path, options=syntax)
 
 
@@ -104,6 +139,7 @@ def Export(file=""):
     encoding = "utf_8"
 
     # get values
+
     if file == "formula":
         forms.check_familydoc(exitscript=True)
         for fp in sorted(get_parameters(), key=lambda p: p["Name"].lower()):
@@ -118,6 +154,7 @@ def Export(file=""):
         groupno = int(random.random() * 6) * 10 + 30
         # export list of shared parameters as "[id] name (GUID)"
         # allows Select by ID and manual delete in Revit
+
         for sp in sorted(elements, key=lambda sp: sp["Name"].lower()):
             text += "[{}]\t{}\t({})\r\n".format(sp["Id"], sp["Name"], sp["GUID"])
             if not sp["Group"] in groupnames:
@@ -128,6 +165,7 @@ def Export(file=""):
         # export shared parameters as shared parameter file
         # groups named by "Group parameter under" value
         # group numbers are random values > 40 to allow copy/paste into existing SP files with minimum overlap
+
         text += (
             "\r\n\r\n# This is a Revit shared parameter file.\r\n"
             "# Do not edit manually.\r\n"
@@ -167,8 +205,8 @@ def Export(file=""):
         elements = sorted(get_projectparameters(), key=lambda k: k["Name"])
         for pp in elements:
             text += "[{}]\t{}\t{}\t{}\t{}\t({})\r\n".format(
-                pp["Id"], 
-                pp["Name"], 
+                pp["Id"],
+                pp["Name"],
                 pp["Type"],
                 pp["Group"],
                 pp["Type or Instance"],
@@ -186,6 +224,7 @@ def Export(file=""):
         syntax = "-lprops"
     elif file == "typecatalog":
         # text = "," + ",".join(sorted(get_typecatalog(), key=lambda k: k["Name"])["TypeCatalogString"]).
+
         text = ","
         header, body = get_typecatalog()
         for tc in header:
@@ -230,9 +269,11 @@ def Export(file=""):
     #    "selectfile":{"last_directory":"C:\\Users\\..."}
     #    <PythonNodeModels.PythonNode ... nickname="..." ...
     #    <Script>...</script>
+
     else:
         syntax = ""
     # save file
+
     if text != "":
         docname = __revit__.ActiveUIDocument.Document.Title
         if any([x in docname for x in [".rfa", ".rvt"]]):
@@ -242,9 +283,11 @@ def Export(file=""):
         if path:
             # tempfile = revit.files.write_text(path, text)
             # revit.files.correct_text_encoding(path)
+
             with codecs.open(path, "w", encoding=encoding) as text_file:
                 text_file.write(text)
         # open file
+
         OpenNpp(path=path, options=syntax)
 
 
@@ -265,25 +308,14 @@ def shorten(text, width=80, placeholder="…"):
 
 
 def toCADname(name):
-    keepCharacters = ("_", "-", "$")
-    replacements = [
-        (".", "_"),
-        (" - ", "-"),
-        (" ", "-"),
-        ("---", "-"),
-        ("--", "-"),
-        ("___", "_"),
-        ("__", "_"),
-    ]
     name = str(name).strip(" _-$").upper()
-    for sub in replacements:
-        name = name.replace(sub[0], sub[1])
-    name = "".join(c for c in name if c.isalnum() or c in keepCharacters)
+    name = "".join(c for c in name if c.isalnum())
     return name[:31]
 
 
 def get_parameters():
     # get list of parameters to be exported
+
     from pyrevit import DB
 
     fm = revit.doc.FamilyManager
@@ -309,7 +341,6 @@ def get_parameters():
                 "Parameter": pr,
             }
         )
-
     return params
 
     # Other parameter properties:
@@ -333,6 +364,7 @@ def get_parameters():
 
 def get_sharedparameters():
     # get shared parameters from project
+
     from pyrevit import DB
 
     doc = revit.doc
@@ -351,7 +383,6 @@ def get_sharedparameters():
             sp_type = DB.LabelUtils.GetLabelForSpec(t).replace("/", "")
         else:
             sp_type = sp_def.ParameterType
-
         sharedparams.append(
             {
                 "Name": sp.Name,
@@ -374,32 +405,41 @@ def get_sharedparameters():
 
 def get_loadedfamilyparameters():
     # get shared parameters from families loaded into the project
+
     from pyrevit import DB
 
     # Retrieve current document
+
     doc = revit.doc
 
     # Retrieve all families in current doc
+
     families = DB.FilteredElementCollector(doc).OfClass(DB.Family)
 
     # Filter the editable families and output result
+
     fmparams = []
 
     # examine each family
+
     for f in families:
         # only look at loadable familes
+
         if f.IsEditable:
             pa = []
             fi = []
             # get types
+
             fs = f.GetFamilySymbolIds()
             insts = False
             # get type parameters
+
             for t in fs:
                 s = doc.GetElement(t)
                 fp = s.GetOrderedParameters()
                 if not insts:
                     # check if there are placed instances
+
                     filter = DB.FamilyInstanceFilter(doc, t)
                     fam_insts = (
                         DB.FilteredElementCollector(doc)
@@ -407,12 +447,14 @@ def get_loadedfamilyparameters():
                         .ToElements()
                     )
                     # if so get the instance parameters
+
                     if len(fam_insts) > 0:
                         insts = True
                         for i in fam_insts:
                             fi = i.Parameters
             if insts:
                 # filter for shared only
+
                 for p in fp:
                     if p.IsShared:
                         pa.append(
@@ -426,6 +468,7 @@ def get_loadedfamilyparameters():
                 fi = famDoc.FamilyManager.Parameters
             for p in fi:
                 # filter for shared only
+
                 if p.IsShared:
                     pa.append(
                         {
@@ -436,9 +479,9 @@ def get_loadedfamilyparameters():
             if not insts:
                 famDoc.Close(False)
             # if parameters exist add to list
+
             if len(pa) > 0:
                 fmparams.append({"Name": f.Name, "Parameters": pa})
-
     return fmparams
 
 
@@ -461,7 +504,6 @@ def get_projectparameters():
             pp_type = str(parambindings.Key.ParameterType)
             if pp_type == "Invalid":
                 pp_type = "Built-in"
-
         projectparams.append(
             {
                 "Name": parambindings.Key.Name,
@@ -472,12 +514,12 @@ def get_projectparameters():
                 "Categories": cats,
             }
         )
-
     return projectparams
 
 
 def get_typecatalog():
     # get type catalog values from family document
+
     from pyrevit import DB
 
     fm = revit.doc.FamilyManager
@@ -533,6 +575,7 @@ def get_typecatalog():
 
 def get_fillpatterns():
     # get fill patterns from project and convert to .pat format
+
     from pyrevit import DB
     import math
 
@@ -540,6 +583,7 @@ def get_fillpatterns():
     result = []
 
     # header
+
     result.append(";%UNITS=MM")
     result.append(";%VERSION=3.0")
     result.append(";;Exported by pyMAW, based on script by Sean Page 2022")
@@ -584,6 +628,7 @@ def get_fillpatterns():
 
 def get_keynotes():
     # get keynotes from project
+
     from pyrevit import DB
 
     doc = revit.doc
