@@ -5,6 +5,7 @@ import json, codecs
 
 sourceFile = forms.pick_file(file_ext="dyn")  # init_dir=''
 
+
 def vetFilename(name):
     keepCharacters = ("_", "-", " ")
     replacements = [

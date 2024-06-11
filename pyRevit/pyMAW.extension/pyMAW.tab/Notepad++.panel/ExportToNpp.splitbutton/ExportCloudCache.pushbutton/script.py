@@ -98,9 +98,7 @@ XCOPY "%cachepath%\\{proj_guid}\\{link_folder}{file_guid}.rvt" "%destpath%\\{lin
 """
     syntax = "-lbatch"
 elif cc_export_format == "csv":
-    preable_text = (
-        "Version,Project GUID,Project,Subdirectory,File GUID,Filename,User,Account Id\r\n"
-    )
+    preable_text = "Version,Project GUID,Project,Subdirectory,File GUID,Filename,User,Account Id\r\n"
     project_text = ""
     model_text = '{revit_ver_no},{proj_guid},"{proj_name}","{link_folder}",{file_guid},"{file_name}","{os_user}",{accountid}\r\n'
     syntax = "-lnormal"
@@ -110,31 +108,31 @@ else:
     model_text = "\t{file_guid} {{{file_name}.rvt}}\r\n"
     syntax = "-lnormal"
 text += preable_text.format(
-    os_user = username,
-    accountid = accountid,
-    revit_ver = revitver,
-    dest_path = cc_destpath,
+    os_user=username,
+    accountid=accountid,
+    revit_ver=revitver,
+    dest_path=cc_destpath,
 )
 
 for pg, pn in projects.items():
     text += project_text.format(
-        os_user = username,
-        accountid = accountid,
-        revit_ver = revitver,
-        proj_guid = pg,
-        proj_name = pn["project"],
+        os_user=username,
+        accountid=accountid,
+        revit_ver=revitver,
+        proj_guid=pg,
+        proj_name=pn["project"],
     )
     for fg, fn in pn.items():
         text += (
             model_text.format(
-                os_user = username,
-                accountid = accountid,
-                revit_ver = revitver,
-                proj_guid = pg,
-                proj_name = pn["project"],
-                file_guid = fg,
-                file_name = fn[0],
-                link_folder = "LinkedModels\\" if fn[1] else "",
+                os_user=username,
+                accountid=accountid,
+                revit_ver=revitver,
+                proj_guid=pg,
+                proj_name=pn["project"],
+                file_guid=fg,
+                file_name=fn[0],
+                link_folder="LinkedModels\\" if fn[1] else "",
             )
             if fg != "project"
             else ""
