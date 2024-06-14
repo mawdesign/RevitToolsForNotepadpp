@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from pyrevit import revit
 from pyrevit import script
 from pyrevit import HOST_APP
@@ -7,22 +6,8 @@ import os, codecs
 
 # import subprocess
 
-dynamoVerList = {
-    "2020.0": "2.3",
-    "2020.1": "2.3",
-    "2020.2": "2.3",
-    "2021.0": "2.5",
-    "2021.1": "2.6",
-    "2022.0": "2.10",
-    "2022.1": "2.12",
-    "2023": "2.13",
-    "2023.1": "2.16",
-    "2024": "2.17",
-    "2024.1": "2.18",
-}
 
-
-def OpenNpp(path="", options="", exepath=None):
+def OpenNpp(targetpath="", options="", exepath=None):
     logger = script.get_logger()
 
     # get Notepad path
@@ -34,21 +19,19 @@ def OpenNpp(path="", options="", exepath=None):
         )
 
     # open Notepad(++) with file
-    if len(path) > 0:
-        path = '"' + os.path.realpath(path) + '"'
+    if len(targetpath) > 0:
+        targetpath = '"' + os.path.realpath(targetpath) + '"'
     if not exepath is None and os.path.exists(exepath):
-        command = 'start "Notepad++" "{0}" {1} {2}'.format(exepath, options, path)
-        logger.debug(command)
-        os.system(command)
+        command = 'start "Notepad++" "{0}" {1} {2}'.format(exepath, options, targetpath)
     else:
-        os.system("start notepad {0}".format(path))
+        command = 'start notepad "{0}"'.format(targetpath)
+    logger.debug(command)
+    script.journal_write("pyMAW_Notepad++", command)
+    os.system(command)
 
 
 def Open(file=""):
-    from pyrevit import HOST_APP
-
     revit_ver = HOST_APP.version
-
     # get file path
     if file == "keynote":
         # get keynote file path
@@ -83,11 +66,36 @@ def Open(file=""):
             )
         )
         syntax = "-lxml"
-    if file == "dynamo settings":
+    elif file == "dynamo settings":
         # get dynamo settings file path
+        dynamoVerList = {
+            "2020.0": "2.3",
+            "2020.1": "2.3",
+            "2020.2": "2.3",
+            "2021.0": "2.5",
+            "2021.1": "2.6",
+            "2021.2": "2.6",
+            "2022.0": "2.10",
+            "2022.1": "2.12",
+            "2023": "2.13",
+            "2023.1": "2.16",
+            "2024": "2.17",
+            "2024.1": "2.18",
+        }
         path = os.getenv("APPDATA") + "\\Dynamo\\Dynamo Revit\\"
-        path += dynamoVerList[HOST_APP.subversion] + "\\DynamoSettings.xml"
-        syntax = "-lxml"
+        if HOST_APP.subversion in dynamoVerList:
+            dynver = dynamoVerList[HOST_APP.subversion]
+        else:
+            from pyrevit import forms, coreutils
+
+            dynvers = coreutils.get_sub_folders(path)
+            dynvers = [x for x in dynvers if "." in x]
+            dynver = forms.SelectFromList.show(
+                dynvers, button_name="Select Dynamo version"
+            )
+        if dynver:
+            path += dynver + "\\DynamoSettings.xml"
+            syntax = "-lxml"
     elif file == "revit server settings":
         # get revit server settings file path
         path = os.path.expandvars(
@@ -114,7 +122,7 @@ def Open(file=""):
         path = ""
         syntax = ""
     # open Notepad(++) with file
-    OpenNpp(path=path, options=syntax)
+    OpenNpp(targetpath=path, options=syntax)
 
 
 def Export(file=""):
@@ -246,11 +254,6 @@ def Export(file=""):
     # syntax = "-lprops"
     # Other ideas...
     # - All text on sheet, view, project
-    # - Python from Dynamo
-    #    C:\Users\mwarwick\AppData\Local\dynamoplayer-2\User data\dynamoplayerinstance 1\Default\Preferences
-    #    "selectfile":{"last_directory":"C:\\Users\\..."}
-    #    <PythonNodeModels.PythonNode ... nickname="..." ...
-    #    <Script>...</script>
     else:
         syntax = ""
     # save file
@@ -261,12 +264,10 @@ def Export(file=""):
         docname += "_" + file
         path = script.get_instance_data_file(docname)
         if path:
-            # tempfile = revit.files.write_text(path, text)
-            # revit.files.correct_text_encoding(path)
             with codecs.open(path, "w", encoding=encoding) as text_file:
                 text_file.write(text)
         # open file
-        OpenNpp(path=path, options=syntax)
+        OpenNpp(targetpath=path, options=syntax)
 
 
 def try_or(fn, default=None):
