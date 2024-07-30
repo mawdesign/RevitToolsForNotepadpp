@@ -6,7 +6,7 @@ layout:
  - RevitINIUser
  - RevitINIDefault
  - KeyboardShortcuts
- - DynamoSettings
- - Journal
  - RevitServer
+ - DynamoSettings
  - IFCCategories
+ - Journal
