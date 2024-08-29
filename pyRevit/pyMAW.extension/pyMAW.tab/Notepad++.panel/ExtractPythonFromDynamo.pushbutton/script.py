@@ -58,4 +58,4 @@ if text != "":
     syntax = "-lpython"
     # open file
 
-    npp.OpenNpp(path=path, options=syntax)
+    npp.OpenNpp(targetpath=path, options=syntax)
