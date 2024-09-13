@@ -135,8 +135,18 @@ def Export(file=""):
     # get values
     if file == "formula":
         forms.check_familydoc(exitscript=True)
-        for fp in sorted(get_parameters(), key=lambda p: p["Name"].lower()):
+        currentGroup = ""
+        groupHeader = ";; " + "-" * 25 + "\r\n;;{:^25}\r\n;; " + "-" * 25 + "\r\n\r\n"
+        groupNameFixes = [("PG_",""),("_"," "),("GEOMETRY","DIMENSIONS"),("TITLE","TITLE TEXT"),("MATERIALS","MATERIALS AND FINISHES")]
+        for fp in get_parameters():
+            if fp["Group"] != currentGroup:
+                groupName = str(fp["Group"]).upper()
+                for old, new in groupNameFixes:
+                    groupName = groupName.replace(old, new)
+                text += groupHeader.format(groupName)
+                currentGroup = fp["Group"]
             text += "[{}] {}\r\n".format(fp["Name"], str(fp["Type"]).upper())
+            text += "; {}\r\n".format(fp["Description"]) if fp["Description"] != "" else ""
             text += "{}\r\n".format(fp["Formula"]) if fp["Formula"] != "" else ""
             text += "\r\n"
         syntax = "-llisp"
@@ -171,12 +181,13 @@ def Export(file=""):
             sorted(elements, key=lambda sp: sp["Name"].lower()),
             key=lambda e: e["Group"],
         ):
-            text += "PARAM\t{}\t{}\t{}\t\t{}\t{}\t\t1\t{}\r\n".format(
+            text += "PARAM\t{}\t{}\t{}\t\t{}\t{}\t{}\t1\t{}\r\n".format(
                 sp["GUID"],
                 sp["Name"],
                 str(sp["Type"]).upper(),
                 groups[sp["Group"]],
                 1 if sp["Visible"] else 0,
+                sp["Description"],
                 1 if sp["HideWhenNoValue"] else 0,
             )
         text += "\r\n"
@@ -292,15 +303,31 @@ def toCADname(name):
     return name[:31]
 
 
+def get_filesharedparameters():
+    app = __revit__.Application
+
+    # get shared parameters from file
+    sharedparams = {"": ""}
+    sharedparamfile = app.OpenSharedParameterFile()
+    text = ""
+    for sg in sharedparamfile.Groups:
+        sgName = sg.Name
+        for sp in sg.Definitions:
+            sharedparams[sp.GUID] = sp.Description
+    return sharedparams
+
+
 def get_parameters():
     # get list of parameters to be exported
     from pyrevit import DB
 
+    sharedparamfile = get_filesharedparameters()
     fm = revit.doc.FamilyManager
     params = []
 
     for pr in fm.GetParameters():
         pr_def = pr.Definition
+        pr_GUID = try_or(lambda: pr.GUID, "")
         if HOST_APP.is_newer_than(2022):
             t = pr_def.GetDataType()
             pr_type = DB.LabelUtils.GetLabelForSpec(t).replace("/", "")
@@ -311,11 +338,13 @@ def get_parameters():
         params.append(
             {
                 "Name": pr_def.Name,
+                "Group": pr_def.ParameterGroup,
                 "isDeterminedByFormula": pr.IsDeterminedByFormula,
                 "Formula": pr.Formula or "",
                 "Type": pr_type,
                 "isShared": pr.IsShared,
-                "GUID": try_or(lambda: pr.GUID, ""),
+                "GUID": pr_GUID,
+                "Description": sharedparamfile[pr_GUID],
                 "Parameter": pr,
             }
         )
@@ -344,6 +373,7 @@ def get_sharedparameters():
     # get shared parameters from project
     from pyrevit import DB
 
+    sharedparamfile = get_filesharedparameters()
     doc = revit.doc
     sharedparams = []
 
@@ -373,6 +403,7 @@ def get_sharedparameters():
                 .replace("_", " ")
                 .title(),
                 "Type": sp_type,
+                "Description": sharedparamfile[sp.GuidValue or ""],
                 "Visible": sp_def.Visible,
                 "HideWhenNoValue": sp.ShouldHideWhenNoValue(),
             }
