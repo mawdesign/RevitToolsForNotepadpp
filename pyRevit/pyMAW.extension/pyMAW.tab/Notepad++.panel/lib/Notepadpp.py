@@ -137,7 +137,13 @@ def Export(file=""):
         forms.check_familydoc(exitscript=True)
         currentGroup = ""
         groupHeader = ";; " + "-" * 25 + "\r\n;;{:^25}\r\n;; " + "-" * 25 + "\r\n\r\n"
-        groupNameFixes = [("PG_",""),("_"," "),("GEOMETRY","DIMENSIONS"),("TITLE","TITLE TEXT"),("MATERIALS","MATERIALS AND FINISHES")]
+        groupNameFixes = [
+            ("PG_", ""),
+            ("_", " "),
+            ("GEOMETRY", "DIMENSIONS"),
+            ("TITLE", "TITLE TEXT"),
+            ("MATERIALS", "MATERIALS AND FINISHES"),
+        ]
         for fp in get_parameters():
             if fp["Group"] != currentGroup:
                 groupName = str(fp["Group"]).upper()
@@ -146,8 +152,11 @@ def Export(file=""):
                 text += groupHeader.format(groupName)
                 currentGroup = fp["Group"]
             text += "[{}] {}\r\n".format(fp["Name"], str(fp["Type"]).upper())
-            text += "; {}\r\n".format(fp["Description"]) if fp["Description"] != "" else ""
+            text += (
+                "; {}\r\n".format(fp["Description"]) if fp["Description"] != "" else ""
+            )
             text += "{}\r\n".format(fp["Formula"]) if fp["Formula"] != "" else ""
+            text += "{}\r\n".format(fp["Value"]) if fp["Value"] != "" else ""
             text += "\r\n"
         syntax = "-llisp"
     elif file == "sharedparams":
@@ -181,10 +190,11 @@ def Export(file=""):
             sorted(elements, key=lambda sp: sp["Name"].lower()),
             key=lambda e: e["Group"],
         ):
-            text += "PARAM\t{}\t{}\t{}\t\t{}\t{}\t{}\t1\t{}\r\n".format(
+            text += "PARAM\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t1\t{}\r\n".format(
                 sp["GUID"],
                 sp["Name"],
                 str(sp["Type"]).upper(),
+                sp["Category"],
                 groups[sp["Group"]],
                 1 if sp["Visible"] else 0,
                 sp["Description"],
@@ -324,6 +334,7 @@ def get_parameters():
     sharedparamfile = get_filesharedparameters()
     fm = revit.doc.FamilyManager
     params = []
+    currentType = fm.CurrentType
 
     for pr in fm.GetParameters():
         pr_def = pr.Definition
@@ -335,6 +346,12 @@ def get_parameters():
             pr_type = pr_def.ParameterType
             if str(pr_type) == "Invalid":
                 pr_type = "Built-in"
+        if str(pr.StorageType) == "ElementId":
+            ele = revit.doc.GetElement(currentType.AsElementId(pr))
+            pr_value = str(ele.Category.Name) if ele else ""
+            #if str(pr_type).upper() == "FAMILYTYPE" else "no"
+        else:
+            pr_value = ""
         params.append(
             {
                 "Name": pr_def.Name,
@@ -344,8 +361,9 @@ def get_parameters():
                 "Type": pr_type,
                 "isShared": pr.IsShared,
                 "GUID": pr_GUID,
-                "Description": sharedparamfile[pr_GUID],
+                "Description": try_or(lambda: sharedparamfile[pr_GUID], ""),
                 "Parameter": pr,
+                "Value": pr_value,
             }
         )
     return params
@@ -377,6 +395,22 @@ def get_sharedparameters():
     doc = revit.doc
     sharedparams = []
 
+    # get parameter categories for FAMILYTYPE parameters
+    pr_FamilyTypes = {}
+    if doc.IsFamilyDocument:
+        fm = doc.FamilyManager
+        currentType = fm.CurrentType
+        for pr in fm.GetParameters():
+            if str(pr.StorageType) == "ElementId":
+                if HOST_APP.is_newer_than(2022):
+                    t = pr.Definition.GetDataType()
+                    pr_type = DB.LabelUtils.GetLabelForSpec(t).replace("/", "")
+                else:
+                    pr_type = pr.Definition.ParameterType
+                if str(pr_type).upper() == "FAMILYTYPE":
+                    ele = doc.GetElement(currentType.AsElementId(pr))
+                    pr_FamilyTypes[pr.Definition.Name] = str(ele.Category.Id) if ele else ""
+
     sp_collector = (
         DB.FilteredElementCollector(doc)
         .WhereElementIsNotElementType()
@@ -390,6 +424,7 @@ def get_sharedparameters():
             sp_type = DB.LabelUtils.GetLabelForSpec(t).replace("/", "")
         else:
             sp_type = sp_def.ParameterType
+        sp_category = pr_FamilyTypes.get(sp.Name, "")
         sharedparams.append(
             {
                 "Name": sp.Name,
@@ -403,7 +438,8 @@ def get_sharedparameters():
                 .replace("_", " ")
                 .title(),
                 "Type": sp_type,
-                "Description": sharedparamfile[sp.GuidValue or ""],
+                "Category": sp_category,
+                "Description": sharedparamfile.get(sp.GuidValue, ""),
                 "Visible": sp_def.Visible,
                 "HideWhenNoValue": sp.ShouldHideWhenNoValue(),
             }
