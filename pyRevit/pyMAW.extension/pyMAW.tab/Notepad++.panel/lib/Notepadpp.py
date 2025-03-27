@@ -151,12 +151,11 @@ def Export(file=""):
                     groupName = groupName.replace(old, new)
                 text += groupHeader.format(groupName)
                 currentGroup = fp["Group"]
-            text += "[{}] {}\r\n".format(fp["Name"], str(fp["Type"]).upper())
+            text += "[{}] {}\r\n".format(fp["Name"], fp["Type"].upper())
             text += (
                 "; {}\r\n".format(fp["Description"]) if fp["Description"] != "" else ""
             )
             text += "{}\r\n".format(fp["Formula"]) if fp["Formula"] != "" else ""
-            text += "{}\r\n".format(fp["Value"]) if fp["Value"] != "" else ""
             text += "\r\n"
         syntax = "-llisp"
     elif file == "sharedparams":
@@ -314,11 +313,21 @@ def toCADname(name):
 
 
 def get_filesharedparameters():
+    from pyrevit import forms
+
     app = __revit__.Application
 
     # get shared parameters from file
     sharedparams = {"": ""}
-    sharedparamfile = app.OpenSharedParameterFile()
+    try:
+        sharedparamfile = app.OpenSharedParameterFile()
+    except:
+        thisFileType = "family." if revit.doc.IsFamilyDocument else "project."
+        forms.alert(
+            "There must be a valid shared parameter file selected for this "
+            + thisFileType,
+            exitscript=True,
+        )
     text = ""
     for sg in sharedparamfile.Groups:
         sgName = sg.Name
@@ -341,17 +350,16 @@ def get_parameters():
         pr_GUID = try_or(lambda: pr.GUID, "")
         if HOST_APP.is_newer_than(2022):
             t = pr_def.GetDataType()
-            pr_type = DB.LabelUtils.GetLabelForSpec(t).replace("/", "")
+            pr_type = str(DB.LabelUtils.GetLabelForSpec(t).replace("/", ""))
         else:
-            pr_type = pr_def.ParameterType
-            if str(pr_type) == "Invalid":
+            pr_type = str(pr_def.ParameterType)
+            if pr_type == "Invalid":
                 pr_type = "Built-in"
-        if str(pr.StorageType) == "ElementId":
+        if str(pr.StorageType) == "ElementId" and pr_type.upper() == "FAMILYTYPE":
             ele = revit.doc.GetElement(currentType.AsElementId(pr))
-            pr_value = str(ele.Category.Name) if ele else ""
-            #if str(pr_type).upper() == "FAMILYTYPE" else "no"
-        else:
-            pr_value = ""
+            pr_type = (
+                pr_type.upper() + " ({})".format(str(ele.Category.Name)) if ele else ""
+            )
         params.append(
             {
                 "Name": pr_def.Name,
@@ -363,7 +371,6 @@ def get_parameters():
                 "GUID": pr_GUID,
                 "Description": try_or(lambda: sharedparamfile[pr_GUID], ""),
                 "Parameter": pr,
-                "Value": pr_value,
             }
         )
     return params
@@ -409,7 +416,9 @@ def get_sharedparameters():
                     pr_type = pr.Definition.ParameterType
                 if str(pr_type).upper() == "FAMILYTYPE":
                     ele = doc.GetElement(currentType.AsElementId(pr))
-                    pr_FamilyTypes[pr.Definition.Name] = str(ele.Category.Id) if ele else ""
+                    pr_FamilyTypes[pr.Definition.Name] = (
+                        str(ele.Category.Id) if ele else ""
+                    )
 
     sp_collector = (
         DB.FilteredElementCollector(doc)
