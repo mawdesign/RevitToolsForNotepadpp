@@ -1,3 +1,4 @@
 [submodule "pyRevit/pyMAWtoolsforNPP.extension"]
 	path = pyRevit/pyMAWtoolsforNPP.extension
 	url = https://github.com/mawdesign/pyRevit-tools-for-npp.git
+	branch = main
