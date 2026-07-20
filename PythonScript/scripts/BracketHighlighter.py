@@ -141,7 +141,7 @@ except NameError:
         clone_detect_dict = {}
         file_tup_list = notepad.getFiles()
         for tup in file_tup_list:
-            (filename, _, _, _) = tup
+            filename, _, _, _ = tup
             if filename not in clone_detect_dict:
                 clone_detect_dict[filename] = 0
             else:
@@ -164,7 +164,7 @@ except NameError:
                 secondary_view_active_doc_bool = False
                 file_tup_list = notepad.getFiles()
                 for tup in file_tup_list:
-                    (filename, _, index_in_view, view_number) = tup
+                    filename, _, index_in_view, view_number = tup
                     if filename == file_name_to_test:
                         if view_number == 0:
                             if index_in_view == curr_doc_index_main_view:
